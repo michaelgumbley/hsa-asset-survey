@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HSA Information Asset Survey</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link href='https://fonts.googleapis.com/css?family=Oxygen:400,300,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+  </head>
+
+
+  <body>
+    <!-- ***** BODY HEADER ***** -->
+    <header>
+      <nav id="header-nav" class="navbar navbar-default">
+        <div class="container">
+          <div class="navbar-header">
+
+            <div class="pull-left" id="logo-img" alt="Health Serve logo image"></div>
+
+            <div class="navbar-brand">
+              <h1>Information Asset Survey - Log In</h1>
+            </div>
+
+          </div>
+        </div><!-- .container -->
+      </nav><!-- #header-nav -->
+    </header>
+
+    <!-- ***** BODY MAIN CONTENT ***** -->
+    <div id="main-content">
+      <div class="container-fluid">
+
+        <!-- screen size warning -->
+        <div class="visible-sm visible-xs size-warning">
+          <p >This survey is not optimised for small devices.  Please use a desktop or laptop to complete it. </p>
+        </div>
+
+        <div id="login-issue-panel"></div>
+
+        
+
+        <div class="panel-login-form">
+
+          <h3 class="text-center form-heading">Log In Details</h3> 
+
+          <form id="login-form" action="./questions.html" method="post">
+
+            <div class="row input-row">
+              <div class="col-xs-4">
+                <label for="email">Email address:</label>
+              </div>
+              <div class="col-xs-8">
+                <input type="email" id="email" name="email" size="32" autofocus>
+              </div>
+            </div>
+            
+            <div class="row input-row">
+              <div class="col-xs-4">
+                <label for="pwd">Password:</label>
+              </div>
+              <div class="col-xs-8">
+                <input type="password" id="pwd" name="pwd" size="32">
+              </div>
+            </div>
+
+            <div class="row submit-row">
+              <div class="col-xs-12">
+                <input class="submit-btn" type="submit" value="Submit">
+              </div>
+            </div>
+            
+          </form>
+
+        </div>
+
+        <div class="v-space-200"></div>
+
+      </div> <!-- /.container-fluid -->
+    </div> <!-- /#main content -->
+
+
+
+
+    <!-- ***** BODY FOOTER ***** -->
+    <footer class="panel-footer">
+      <div class="container">
+        <div class="text-center">
+          Created for HealthServe Australia <br>
+          <br>
+          &copy; Michael Gumbley 2023
+        </div>
+      </div>
+    </footer>
+
+    <!-- jQuery (Bootstrap JS plugins depend on it) -->
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/ajax-utils.js"></script>
+    <script src="js/script.js"></script>
+  </body>
+</html>

@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>HSA Information Asset Survey</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/styles.css">
+    <link href='https://fonts.googleapis.com/css?family=Oxygen:400,300,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Lora' rel='stylesheet' type='text/css'>
+  </head>
+
+
+  <body>
+    <!-- ***** BODY HEADER ***** -->
+    <header>
+      <nav id="header-nav" class="navbar navbar-default">
+        <div class="container">
+          <div class="navbar-header">
+
+            <div class="pull-left" id="logo-img" alt="Health Serve logo image"></div>
+
+            <div class="navbar-brand">
+              <h1>Information Asset Survey - Questions</h1>
+            </div>
+
+          </div>
+        </div><!-- .container -->
+      </nav><!-- #header-nav -->
+    </header>
+
+    <!-- ***** BODY MAIN CONTENT ***** -->
+    <div id="main-content">
+      <div class="container-fluid">
+
+        <!-- screen size warning -->
+        <div class="visible-sm visible-xs size-warning">
+          <p >This survey is not optimised for small devices.  Please use a desktop or laptop to complete it. </p>
+        </div>
+
+        <!-- <div id="login-issue-panel"></div> -->
+
+        
+
+        <div class="panel-survey-form">
+
+          <h3 class="text-center form-heading">Key Information</h3> 
+
+          <p><b>What are we doing?</b> The intent of this form is to gather initial information related to HealthServe Australia's digital assets, also known as information assets.  We are creating an Information Asset Register as part of our Cyber Security assessment.</p>
+          <p><b>How long will it take?</b>  I'm not going to lie, it's probably not going to be quick.  Get yourself a tea or coffee before you go on.  It will probably take you 30 mins or so to complete this properly.  It's always easier to update something than it is to create it from scratch.</p>
+          <p><b>What are information assets?</b>  Any data, device or application used to access, modify or store HSA information.  In our case this will likely include device and application assets that HSA does not own or license.  (More on that as we go.)</p>
+          <p><b>If in doubt, add it.</b>  As you answer the following questions, opt to include things that you are unsure about.  It is better for us to remove superfluous items later if they are not required, rather than missing important information.</p>
+          <p><b>A note on this process:</b> This form is being distributed internally only - directly to staff, board members and volunteers who interact with HSA information.  This survey has been authorised by the Board and the CEO, Michael Burke.</p>
+
+          <hr>
+
+          <h3 class="text-center form-heading" id="clickTrigger">Survey Questions</h3> 
+
+          <form id="survey-form">
+
+            <p><b>QUESTION 1: Please list the <u>DEVICES</u> you use to access HSA systems, and to create, read, modify or delete HSA documents & other files.</b></p>  
+            <p>Think about: laptops, PCs, tablets, phones, etc.</p> 
+            <p>Example - Device: Windows Laptop, Owner: mine</p> 
+            <p>Please list all devices you have used in the last 6 months.</p> 
+
+            <div class="row">
+              <div class="col-xs-8 responses-narrow">
+
+                <div class="row input-header-row">
+                  <div class="col-xs-1">
+                    <label></label>
+                  </div>
+                  <div class="col-xs-5">
+                    <label>Device</label>
+                  </div>
+                  <div class="col-xs-5">
+                    <label>Owner</label>
+                  </div>
+                </div>
+                
+                <!-- Dynamically add Q1 input rows here -->
+                <div id="q1InputRows"></div>
+
+
+                
+              </div> 
+
+              <div class="col-xs-4"> </div> <!-- Rightside response row filler -->
+
+            </div>
+
+            <hr>
+
+            <p><b>QUESTION 2: something something something something...</b></p>  
+          
+
+
+            
+
+            <div class="row submit-row">
+              <div class="col-xs-12">
+                <input class="submit-btn" type="submit" value="Submit">
+              </div>
+            </div>
+            
+          </form>
+
+        </div>
+
+        <div class="v-space-200"></div>
+
+      </div> <!-- /.container-fluid -->
+    </div> <!-- /#main content -->
+
+
+
+
+    <!-- ***** BODY FOOTER ***** -->
+    <footer class="panel-footer">
+      <div class="container">
+        <div class="text-center">
+          Created for HealthServe Australia <br>
+          <br>
+          &copy; Michael Gumbley 2023
+        </div>
+      </div>
+    </footer>
+
+    <!-- jQuery (Bootstrap JS plugins depend on it) -->
+    <script src="js/jquery-2.1.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/ajax-utils.js"></script>
+    <script src="js/script.js"></script>
+  </body>
+</html>

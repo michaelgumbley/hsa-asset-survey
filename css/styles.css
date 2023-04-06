@@ -1,0 +1,118 @@
+/***** SITE COMMON *****/
+body {
+  font-size: 16px;
+/*  color: #fff;
+  background-color: #61122f;*/
+  font-family: 'Oxygen', sans-serif;
+
+}
+.v-space-200{
+  height: 200px;
+}
+.size-warning{
+  color: white;
+  background-color: #ff3333;
+  font-size: 1.1em;
+  font-weight: bold;
+  margin: 20px 30px 20px 30px;
+  padding: 5px 0px 5px 0px;
+  text-align: center;
+}
+
+
+/***** SITE HEADER *******/
+#header-nav {
+/*  background-color: #f6b319;*/
+  border-radius: 0;
+  border: 0;
+}
+#logo-img {
+  background: url('https://www.healthserve.org.au/images/HSA_Logo_2020_refresh_-235x80.png') no-repeat;
+  width: 235px;
+  height: 80px;
+  margin: 10px 55px 10px 0;
+}
+.navbar-brand h1 { /* Restaurant name */
+  /*font-family: 'Lora', serif;
+  color: #557c3e;
+  font-size: 1.5em;
+  text-transform: uppercase;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px #222;
+  margin-top: 0;
+  margin-bottom: 0;*/
+  line-height: 0.75;
+  margin-left: 0;
+}
+
+/***** ALL FORMS *****/
+.form-heading { 
+  /*expecrted to be h3*/
+  margin-top: 20px;
+  margin-bottom: 30px;
+}
+.input-row{
+  margin-bottom: 5px;
+}
+.submit-row{
+  margin-top: 60px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+.submit-row .submit-btn{
+  font-size: 1.1em;
+  padding: 2px 15px 2px 15px;
+}
+
+.rowId{
+  align-content: center;
+}
+
+
+/***** LOGIN PAGE SPECIFIC *****/
+#login-issue-panel{
+  visibility: hidden;
+  color: white;
+  background-color: #ff3333;
+  font-weight: bold;
+  margin: 20px 30px 20px 30px;
+  padding: 5px 0px 5px 0px;
+  text-align: center;
+}
+
+/** LOGIN FORM **/
+.panel-login-form {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  width: 500px;
+  background-color: #eeeeee;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #666666;
+}
+
+
+/***** SURVEY PAGE SPECIFIC *****/
+
+
+/** SURVEY FORM **/
+.panel-survey-form {
+  margin-top: 50px;
+  margin-bottom: 50px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  width: 980px;
+  background-color: lightskyblue;
+  border-width: 1px;
+  border-style: solid;
+  border-color: #6666CC;
+}
+
+.responses-narrow{
+  background-color: lemonchiffon;
+}
+
