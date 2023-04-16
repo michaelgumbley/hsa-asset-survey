@@ -5,6 +5,7 @@
   var dc = {};
   var q1RowHtmlUrl = "snippets/q1-row-snippet.html";
   var q1LastRowNum = 0;
+  var addingRow = false;
 
   // Convenience function for inserting innerHTML
   var insertHtml = function (selector, html) {
@@ -89,6 +90,8 @@
 
     destSelector = hashPrefix(destSelector, true); //needs hash
     addNewRowBtnIdPrefix = hashPrefix(addNewRowBtnIdPrefix, false); //no hash
+    //change addingRow state
+    addingRow = true;
 
     // Ajax call to get and use snippet content
     $ajaxUtils.sendGetRequest(
@@ -112,6 +115,8 @@
         var btnSelector = addNewRowBtnIdPrefix + newRowNum; 
         addNewRowBtnListener(btnSelector, destSelector);
 
+        //change addingRow state
+        addingRow = false;
 
       },
       false); // False here for regular HTML from the server(no need to process JSON).
@@ -135,9 +140,18 @@
 
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+  //TEST HARNESS:  quick and dirty Click Trigger #0 for Key Info heading
+  document.querySelector("#clickTrigger0").addEventListener("click", function (event) { 
+    console.log("Key Info Trigger Clicked!");
 
-  //TEST HARNESS:  quick and dirty Click Trigger for Form H3
-  document.querySelector("#clickTrigger").addEventListener("click", function (event) { 
+    //call
+    document.querySelector("#q1InputRows").innerHTML = "";
+    q1LastRowNum = 0;
+
+  });
+
+  //TEST HARNESS:  quick and dirty Click Trigger #1 for Form H3
+  document.querySelector("#clickTrigger1").addEventListener("click", function (event) { 
     console.log("H3 Trigger Clicked!");
 
     //call
@@ -145,31 +159,108 @@
 
   });
 
+  //TEST HARNESS:  quick and dirty Click Trigger #2 for Q2 "p" tag
+  document.querySelector("#clickTrigger2").addEventListener("click", function (event) { 
+    console.log("Q2 Trigger Clicked!");
 
-  //gather responses on successful submit
+    //call
+    fillResponses(dc.allResponses);
+
+  });
+
+
+
+  //FUNCTION: to gather responses into a JSON object (on save or submit)
   function gatherResponses(){
 
     const allResponses = {q1: [], q2: [], q3: [] };
-    // const deviceName = "device";
-    // const ownerName = "owner";
 
+    //Q1 loop
     for (let i = 1; i <= q1LastRowNum; i++) {
 
       let deviceId = "device" + i; 
-
       let deviceVal = document.querySelector("#q1Device" + i).value;
       let ownerVal = document.querySelector("#q1Owner" + i).value;
-      
-      console.log(deviceVal, ownerVal);
 
+      //add if not empty
       if((deviceVal + ownerVal).trim().length > 0 ){
-        //add to q1Responses obj
+        //add to allResponses
         allResponses.q1.push( {device: deviceVal.trim(), owner: ownerVal.trim()} );
       };
     }; //end for
 
-    console.log(allResponses);
+    //TODO: Q2 loop
+
+    //TODO: Q3 loop
+
+    console.log("allResponses: ", allResponses);
+
+    //add to object instance
+    dc.allResponses = allResponses;
+
+    console.log("dc created: ", dc);
+
+    //return
+    return allResponses;
   };
+
+
+  //FUNCTION: to fill the existing responses into the grids
+  function fillResponses(allResponses){
+
+    console.log("Arg: ", allResponses);
+    console.log("DC: ", dc.allResponses);
+
+    //Q1 loop
+    const q1RespObjArray = allResponses.q1;
+    var q1ResponseLine = 0;
+
+    console.log("Response array: ", q1RespObjArray);
+
+    for (let i = 0; i < q1RespObjArray.length; i++){  //standard loop for arrays!
+      //new response line
+      q1ResponseLine++;
+
+      console.log("New line no: " + q1ResponseLine + "  resp obj: ", q1RespObjArray[i]);
+
+      //add response row if needed 
+      if (q1LastRowNum < q1ResponseLine){
+        console.log("Adding Q1 response row for filling.");
+        buildNewRowHtml (q1RowHtmlUrl, q1ResponseLine, "#q1InputRows", "q1AddRowBtn");
+        q1LastRowNum++;
+      };
+
+      //wait if new row is still being added
+      let cnt = 0;
+      while (addingRow && cnt <= 5) {
+        //do nothing, just wait
+        cnt++;
+        delay(1500);
+      };
+
+      console.log("cnt = ", cnt);
+
+      //fill row
+      console.log(q1RespObjArray[i], q1RespObjArray[i].device);
+      console.log(document.querySelector("#q1Device" + q1ResponseLine));
+      console.log("innerHtml" , document.querySelector("#q1InputRows").innerHTML);
+      document.querySelector("#q1Device" + q1ResponseLine).value = q1RespObjArray[i].device;  //ISSUE HERE with new row!!!
+      document.querySelector("#q1Owner" + q1ResponseLine).value = q1RespObjArray[i].owner;
+
+    };
+
+    //TODO: Q2 loop
+
+    //TODO: Q3 loop
+
+
+  };
+
+  async function delay(ms) {
+    console.log('delaying ', ms);
+    await new Promise(resolve => setTimeout(resolve, ms));
+  };
+
 
 
 
