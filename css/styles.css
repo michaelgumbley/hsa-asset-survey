@@ -94,6 +94,40 @@ body {
   border-color: #666666;
 }
 
+#securityInput{
+  width: 60px;
+}
+
+#mathCanvas{
+/*  width: 800px;
+  height: 26px; */
+  border-width: 1px;
+  border-style: solid;
+  border-color: #999999;
+  margin-bottom: -8px;
+
+}
+
+.securityBtn{
+  height: 24px;
+  margin-top: 3px;
+  font-size: 14px;
+  font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+
+#securityOutcome{
+  color: red;
+  font-size: 14px;
+}
+
+.no-pad-right{
+  padding-right: 0px;
+}
+
+.no-pad-left{
+  padding-left: 0px;
+}
+
 
 /***** SURVEY PAGE SPECIFIC *****/
 
