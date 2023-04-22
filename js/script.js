@@ -1,6 +1,8 @@
 
-
-(function (global) {
+//immediately-invoked function: used to execute immediately on page load, and only once, then kill local resources
+// "global" is now a proxy for 'window'
+                        //TODO: named functions shouldn't be here
+(function (global) { 
   //locals
   var dc = {};
   var q1RowHtmlUrl = "snippets/q1-row-snippet.html";
@@ -260,8 +262,6 @@
     console.log('delaying ', ms);
     await new Promise(resolve => setTimeout(resolve, ms));
   };
-
-
 
 
     
