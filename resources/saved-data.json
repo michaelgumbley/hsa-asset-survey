@@ -1,0 +1,30 @@
+{
+	"p01": 
+	{
+		"q1": 
+		[
+			{"device": "Windows 10 Laptop",
+				"owner": "Peggy Ho"
+			},
+			{"device": "Samsung A21 smart phone",
+			"owner": "Peggy Ho"
+			}
+		],
+		"q2": [],
+		"q3": []
+	},
+	"m01": 
+	{
+		"q1": 
+		[
+			{"device": "Apple Airbook",
+				"owner": "Rachel Gijsbers"
+			},
+			{"device": "Apple iPhone 12",
+			"owner": "Rachel Gijsbers"
+			}
+		],
+		"q2": [],
+		"q3": []
+	}
+}

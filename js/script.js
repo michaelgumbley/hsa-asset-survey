@@ -1,13 +1,142 @@
+//ISSUE: getting resources & waiting for DOM load prior to building elements (line 24)
+
+const resourceLoaded = (function () {
+  //create private Set
+  const resourceRegister = new Set(); //snippet1, snippet2, snippet3, savedData, DOMloaded
+
+  return function (resourceName) { 
+    //add resource
+    resourceRegister.add(resourceName);
+    console.log("Added: "+ resourceName);
+
+    if(resourceRegister.has("snippet1") && resourceRegister.has("snippet2") && resourceRegister.has("snippet3") && 
+      resourceRegister.has("savedData") && resourceRegister.has("DOMloaded"))
+    {
+      //load is complete - do stuff here 
+      //call checkAuthentication() - needs return
+      //check authentication
+      checkAuthentication();
+
+      //get responses for this userid
+      console.log($hsa.savedData[$hsa.userid]);
+      $hsa.allResponses = $hsa.savedData[$hsa.userid];
+
+      //LOAD Q1
+      // add required rows
+      $hsa.q1LastRowNum = 0;
+      let rowsNeeded = $hsa.allResponses.q1.length + 1;
+      
+      console.log("rowsNeeded = " + rowsNeeded);
+
+      while ($hsa.q1LastRowNum < rowsNeeded){
+        //increment last row
+        $hsa.q1LastRowNum++;
+
+        console.log("Adding Q1 response row " + $hsa.q1LastRowNum + " for filling.");
+        //add it
+        buildNewRowHtml ($hsa.q1RowHtml, $hsa.q1LastRowNum, "#q1InputRows", "q1AddRowBtn");
+        
+      };
+
+      //fill the rows
+      fillQ1Responses();
+
+      // // plus 1 new row
+      // buildNewRowHtml ($hsa.q1RowHtml, $hsa.q1LastRowNum + 1, "#q1InputRows", "q1AddRowBtn");
+      // $hsa.q1LastRowNum++;
+
+
+
+      // //build and load Q1
+      // console.log("Initial buildNewRowHtml call - with newRowNum = 1");
+      // // buildNewRowHtml (q1RowHtmlUrl, 1, "#q1InputRows", "q1AddRowBtn");
+      // buildNewRowHtml ($hsa.q1RowHtml, 1, "#q1InputRows", "q1AddRowBtn");
+      
+      // console.log("Increment q1LastRowNum, when q1LastRowNum = ", $hsa.q1LastRowNum);
+      // $hsa.q1LastRowNum++;
+
+ 
+      //build and load Q2
+      //build and load Q3
+    }
+    return true}
+})();
+
+
+//immediately-invoked function: used to execute immediately on page load, and only once, then kill local resources
+(function (global) { 
+
+  //Step 0 - Set vars
+  const q1RowHtmlUrl = "snippets/q1-row-snippet.html";
+  const q2RowHtmlUrl = "snippets/q2-row-snippet.html";
+  const q3RowHtmlUrl = "snippets/q3-row-snippet.html";
+  const savedDataUrl = "resources/saved-data.json";
+  global.$hsa = {};
+  $hsa.q1LastRowNum = 0;
+
+  //Step 1 - Get resourses - async
+
+  // Ajax calls to get Q1, Q2 ,Q3 snippet content
+  $ajaxUtils.sendGetRequest(
+    q1RowHtmlUrl,
+    function (snippetHtml) {
+      //save snippet to resources object
+      $hsa.q1RowHtml = snippetHtml;
+      //register loaded resource
+      resourceLoaded("snippet1"); 
+    },
+    false); // False here for regular HTML from the server(no need to process JSON).
+
+  $ajaxUtils.sendGetRequest(
+    q2RowHtmlUrl,
+    function (snippetHtml) {
+      //save snippet to resources object
+      $hsa.q2RowHtml = snippetHtml;
+      //register loaded resource
+      resourceLoaded("snippet2");
+    },
+    false); 
+
+  $ajaxUtils.sendGetRequest(
+    q3RowHtmlUrl, 
+    function (snippetHtml) {
+      //save snippet to resources object
+      $hsa.q3RowHtml = snippetHtml;
+      //register loaded resource
+      resourceLoaded("snippet3");
+    },
+    false); 
+
+    // Ajax calls to get saved data object
+    $ajaxUtils.sendGetRequest(
+      savedDataUrl,
+      function (jsonObject) {
+        //parse and store save json object
+        $hsa.savedData = jsonObject;
+        console.log("Saved Data - ", jsonObject);
+
+        //register loaded resource
+        resourceLoaded("savedData");
+      },
+      true); // True here to process as JSON.
+
+
+  //Step 3 - generate page elements
+  //step 4 - enable listeners & functionality
+
+})(window);
+
+
 
 //immediately-invoked function: used to execute immediately on page load, and only once, then kill local resources
 // "global" is now a proxy for 'window'
                         //TODO: named functions shouldn't be here
-(function (global) { 
+// (function (global) { 
   //locals
-  var dc = {};
-  var q1RowHtmlUrl = "snippets/q1-row-snippet.html";
-  var q1LastRowNum = 0;
-  var addingRow = false;
+  // var dc = {};
+  // var q1RowHtmlUrl = "snippets/q1-row-snippet.html";
+  // var q1LastRowNum = 0;
+  // var addingRow = false;
 
   // Convenience function for inserting innerHTML
   var insertHtml = function (selector, html) {
@@ -47,8 +176,8 @@
   // Return substitution of '{{subLocator}}' with subValue within 'inString'
   var substituteValue = function (inString, subLocator, subValue) {
     var textToReplace = "{{" + subLocator + "}}";
-    inString = inString
-      .replace(new RegExp(textToReplace, "g"), subValue);
+    inString = inString.replace(new RegExp(textToReplace, "g"), subValue);
+    
     return inString;
   };
 
@@ -65,78 +194,73 @@
       var addNewRowBtnIdPrefix =  targetSelector.slice(0, targetSelector.lastIndexOf("n") + 1); 
       addNewRowBtnIdPrefix = hashPrefix(addNewRowBtnIdPrefix, false);
  
-      buildNewRowHtml (q1RowHtmlUrl, (q1LastRowNum + 1), newRowContainerId, addNewRowBtnIdPrefix);   
-
-      q1LastRowNum++;
+      // buildNewRowHtml (q1RowHtmlUrl, (q1LastRowNum + 1), newRowContainerId, addNewRowBtnIdPrefix);
+      //increment last row
+      $hsa.q1LastRowNum++;
+      //now add it
+      buildNewRowHtml ($hsa.q1RowHtml, $hsa.q1LastRowNum, newRowContainerId, addNewRowBtnIdPrefix);
+      //refill the data
+      fillQ1Responses();
 
     });
   }
 
 
-  // document.querySelector(targetSelector).addEventListener("click", function (event) { 
-  //     console.log(targetSelector + " Click dynamic event!");
-
-  //     //remove the line number at the end of targetSelector and ensure no hash prefix
-  //     var addNewRowBtnIdPrefix =  targetSelector.slice(0, targetSelector.lastIndexOf("n") + 1); 
-  //     addNewRowBtnIdPrefix = hashPrefix(addNewRowBtnIdPrefix, false);
- 
-  //     buildNewRowHtml (q1RowHtmlUrl, (q1LastRowNum + 1), newRowContainerId, addNewRowBtnIdPrefix);   
-
-  //     q1LastRowNum++;
-
-  //   });
-
-
-  // Builds HTML for the home page based on categories array returned from the server.
-  function buildNewRowHtml (htmlSnippetUrl, newRowNum, destSelector, addNewRowBtnIdPrefix) {
+  // Builds HTML for the home page based on categories array returned from the server.  ORIGINAL
+  function buildNewRowHtml (snippetHtml, newRowNum, destSelector, addNewRowBtnIdPrefix) {
 
     destSelector = hashPrefix(destSelector, true); //needs hash
     addNewRowBtnIdPrefix = hashPrefix(addNewRowBtnIdPrefix, false); //no hash
-    //change addingRow state
-    addingRow = true;
 
-    // Ajax call to get and use snippet content
-    $ajaxUtils.sendGetRequest(
-      htmlSnippetUrl,
-      function (snippetHtml) {
+    //STEP 1: substitute now row numbers
+    var htmlToAppend = substituteValue(snippetHtml, "RowNum", newRowNum);
 
-        //STEP 1: substitute now row numbers
-        var htmlToAppend = substituteValue(snippetHtml, "RowNum", newRowNum);
+    // STEP 2: Insert the produced HTML into the page
+    appendHtml(destSelector, htmlToAppend);
 
-        // STEP 2: Insert the produced HTML into the page
-        appendHtml(destSelector, htmlToAppend);
+    // STEP 3: hack to hide previous New Row button
+    var htmlText = document.querySelector(destSelector).innerHTML;
+    var textToReplace = addNewRowBtnIdPrefix + (newRowNum - 1) + '"';
+    var subValue = textToReplace + ' hidden';
+    var newHtml = htmlText.replace(new RegExp(textToReplace, "g"), subValue);
+    document.querySelector(destSelector).innerHTML = newHtml;
 
-        // STEP 3: hack to hide previous New Row button
-        var htmlText = document.querySelector(destSelector).innerHTML;
-        var textToReplace = addNewRowBtnIdPrefix + (newRowNum - 1) + '"';
-        var subValue = textToReplace + ' hidden';
-        var newHtml = htmlText.replace(new RegExp(textToReplace, "g"), subValue);
-        document.querySelector(destSelector).innerHTML = newHtml;
+    // STEP 4: add dynamic listener
+    var btnSelector = addNewRowBtnIdPrefix + newRowNum; 
+    addNewRowBtnListener(btnSelector, destSelector);
+      
+  };
 
-        // STEP 4: add dynamic listener
-        var btnSelector = addNewRowBtnIdPrefix + newRowNum; 
-        addNewRowBtnListener(btnSelector, destSelector);
+  function checkAuthentication(){
+    //check authentication
+    const queryString = window.location.search;
+    console.log(queryString);
+    let params = queryString.slice(1).split("|");
+    let d = new Date();
+    let minsToday = d.getMinutes() + (d.getHours() * 60);
+    let dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
 
-        //change addingRow state
-        addingRow = false;
+    if(dayOfYear == params[0] && minsToday >= params[1] && minsToday < (params[1] +30)){ //keep valid for 30 mins
+      console.log("Hello " + params[3] + "  id: " + params[2]);
+      //set id & username
+      $hsa.userid = params[2];
+      $hsa.username = params[3];
+    }
+    else{
+      console.log("Authentication issues! " + dayOfYear + " " + params[0] + " | " +  minsToday + " " +  params[1]);
 
-      },
-      false); // False here for regular HTML from the server(no need to process JSON).
-  }
+      //Repace inner html with authentication issue msg
+      document.querySelector("#survey-container").innerHTML = 
+        "<h3>Authentication issue!</h3><h4>Please return to the <a href='index.html'>login page</a> to reauthenticate</h4>";
+    };
+  };
 
 
   // On page load - before images or CSS 
   $(function () { // Same as document.addEventListener("DOMContentLoaded"...
 
-    //Initially create the first input row & add listener & increment rowcount
-    console.log("Page loaded - make initial calls...");
-
-    console.log("Initial buildNewRowHtml call - with newRowNum = 1");
-    buildNewRowHtml (q1RowHtmlUrl, 1, "#q1InputRows", "q1AddRowBtn");
-    
-    console.log("Increment q1LastRowNum, when q1LastRowNum = ", q1LastRowNum);
-    q1LastRowNum++;
-    
+    //register loaded resource
+    resourceLoaded("DOMloaded");
   });  
 
 
@@ -148,7 +272,7 @@
 
     //call
     document.querySelector("#q1InputRows").innerHTML = "";
-    q1LastRowNum = 0;
+    $hsa.q1LastRowNum = 0;
 
   });
 
@@ -166,7 +290,7 @@
     console.log("Q2 Trigger Clicked!");
 
     //call
-    fillResponses(dc.allResponses);
+    fillQ1Responses();
 
   });
 
@@ -178,7 +302,7 @@
     const allResponses = {q1: [], q2: [], q3: [] };
 
     //Q1 loop
-    for (let i = 1; i <= q1LastRowNum; i++) {
+    for (let i = 1; i <= $hsa.q1LastRowNum; i++) {
 
       let deviceId = "device" + i; 
       let deviceVal = document.querySelector("#q1Device" + i).value;
@@ -198,9 +322,7 @@
     console.log("allResponses: ", allResponses);
 
     //add to object instance
-    dc.allResponses = allResponses;
-
-    console.log("dc created: ", dc);
+    $hsa.allResponses = allResponses;
 
     //return
     return allResponses;
@@ -208,13 +330,10 @@
 
 
   //FUNCTION: to fill the existing responses into the grids
-  function fillResponses(allResponses){
-
-    console.log("Arg: ", allResponses);
-    console.log("DC: ", dc.allResponses);
+  function fillQ1Responses(){
 
     //Q1 loop
-    const q1RespObjArray = allResponses.q1;
+    const q1RespObjArray = $hsa.allResponses.q1;
     var q1ResponseLine = 0;
 
     console.log("Response array: ", q1RespObjArray);
@@ -226,27 +345,17 @@
       console.log("New line no: " + q1ResponseLine + "  resp obj: ", q1RespObjArray[i]);
 
       //add response row if needed 
-      if (q1LastRowNum < q1ResponseLine){
+      if ($hsa.q1LastRowNum < q1ResponseLine){
         console.log("Adding Q1 response row for filling.");
-        buildNewRowHtml (q1RowHtmlUrl, q1ResponseLine, "#q1InputRows", "q1AddRowBtn");
-        q1LastRowNum++;
+        buildNewRowHtml ($hsa.q1RowHtml, q1ResponseLine, "#q1InputRows", "q1AddRowBtn");
+        $hsa.q1LastRowNum++;
       };
 
-      //wait if new row is still being added
-      let cnt = 0;
-      while (addingRow && cnt <= 5) {
-        //do nothing, just wait
-        cnt++;
-        delay(1500);
-      };
-
-      console.log("cnt = ", cnt);
 
       //fill row
-      console.log(q1RespObjArray[i], q1RespObjArray[i].device);
-      console.log(document.querySelector("#q1Device" + q1ResponseLine));
-      console.log("innerHtml" , document.querySelector("#q1InputRows").innerHTML);
-      document.querySelector("#q1Device" + q1ResponseLine).value = q1RespObjArray[i].device;  //ISSUE HERE with new row!!!
+      console.log(q1RespObjArray[i]);
+
+      document.querySelector("#q1Device" + q1ResponseLine).value = q1RespObjArray[i].device; 
       document.querySelector("#q1Owner" + q1ResponseLine).value = q1RespObjArray[i].owner;
 
     };
@@ -258,16 +367,13 @@
 
   };
 
-  async function delay(ms) {
-    console.log('delaying ', ms);
-    await new Promise(resolve => setTimeout(resolve, ms));
-  };
+
 
 
     
 
-  global.$dc = dc;
 
-})(window);
+
+// })(window);
 
 
