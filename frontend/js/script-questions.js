@@ -1,3 +1,8 @@
+const savedDataUrl = "http://localhost:5000/api/user-data/12"; 
+$hsa = {};
+$hsa.q1LastRowNum = 0;
+$hsa.lastSavedIdx = -1;
+
 // ***** IFFE SETUP CODE ***** //
 
 (function (global) { 
@@ -7,9 +12,11 @@
   const q1RowHtmlUrl = "snippets/q1-row-snippet.html";
   const q2RowHtmlUrl = "snippets/q2-row-snippet.html";
   const q3RowHtmlUrl = "snippets/q3-row-snippet.html";
-  const savedDataUrl = "resources/saved-data.json";
-  global.$hsa = {};
-  $hsa.q1LastRowNum = 0;
+  // const savedDataUrl = "resources/saved-data.json";
+  
+  // global.$hsa = {};
+  // $hsa.q1LastRowNum = 0;
+  // $hsa.lastSavedIdx = -1;
 
   //SETUP STEP 1 - Get resourses 
 
@@ -55,24 +62,57 @@
 	    false); 
 	});
  
-	//Get saved data
-	const sd =  new Promise((resolve) => {
+	// //Get saved data - FRONT END SOLUTION
+	// const sd =  new Promise((resolve) => {
 
-		//compile the correct URL first, using the userId???
+	// 	//compile the correct URL first, using the userId???
 
-		//ajax call
-		$ajaxUtils.sendGetRequest(
-      savedDataUrl,
-      function (jsonObject) {
-        //parse and store save json object
-        $hsa.savedData = jsonObject;
-        console.log("Saved Data - ", jsonObject);
+	// 	//ajax call
+	// 	$ajaxUtils.sendGetRequest(
+  //     savedDataUrl,
+  //     function (jsonObject) {
+  //       //parse and store save json object
+  //       $hsa.savedData = jsonObject;
+  //       console.log("Saved Data - ", jsonObject);
 
-        //resolve promise
-	      resolve();
-      },
-      true); // True here to process as JSON.
-	});
+  //       //resolve promise
+	//       resolve();
+  //     },
+  //     true); // True here to process as JSON.
+	// });
+
+  //Get saved data - WEB SERVER SOLUTION
+  const sd =  new Promise((resolve) => {
+
+    //get the userId for the data desired???
+
+
+    // Create an XMLHttpRequest object
+    const xhttp = new XMLHttpRequest();
+
+    // The callback function
+    xhttp.onload = function() {
+      // Here you can use the Data
+      const jsonObject = JSON.parse(this.responseText);
+      // $hsa.savedData = jsonObject; //all
+      $hsa.allResponses = jsonObject; //by user
+      console.log("API Loaded Data - ", jsonObject);
+
+      //resolve promise
+      resolve();
+      
+    };
+
+    // Send the request
+    xhttp.open("GET", savedDataUrl);
+    xhttp.send();
+
+  });
+
+
+
+
+
   
 
 	//Once all resources have been loaded
@@ -81,22 +121,22 @@
 	.catch(err => console.log('Error:', err.message));
 
 
-                  //FIRST NODE GET CALL!
-                  const nodeUrl = "http://localhost:5000/api/genres"
-                  const p = new Promise((resolve, reject) => {
-                    //ajax call
-                    $ajaxUtils.sendGetRequest(
-                      nodeUrl,
-                      function (genres) {
-                        //resolve promise
-                        resolve(genres); 
-                      },
-                      false); // False here for regular HTML from the server(no need to process JSON).
-                  });
+                  // //FIRST NODE GET CALL!
+                  // const nodeUrl = "http://localhost:5000/api/genres"
+                  // const p = new Promise((resolve, reject) => {
+                  //   //ajax call
+                  //   $ajaxUtils.sendGetRequest(
+                  //     nodeUrl,
+                  //     function (genres) {
+                  //       //resolve promise
+                  //       resolve(genres); 
+                  //     },
+                  //     false); // False here for regular HTML from the server(no need to process JSON).
+                  // });
 
-                  p
-                  .then(result => console.log('result = ', result))
-                  .catch(err => console.log('Error', err.message));
+                  // p
+                  // .then(result => console.log('result = ', result))
+                  // .catch(err => console.log('Error', err.message));
 
 
 
@@ -126,9 +166,9 @@
     checkAuthentication();
     console.log($hsa.userid);
 
-    //get responses for this userid
-    console.log($hsa.savedData[$hsa.userid]);
-    $hsa.allResponses = $hsa.savedData[$hsa.userid];
+    // //get responses for this userid  <<< FOR ALL DATA
+    // console.log($hsa.savedData[$hsa.userid]);
+    // $hsa.allResponses = $hsa.savedData[$hsa.userid];
 
     //LOAD Q1
     // add required rows
@@ -298,7 +338,49 @@ function gatherResponses(){
   //add to object instance
   $hsa.allResponses = allResponses;
 
+  console.log("Gathered data: ", allResponses);
+
+  //Save to the server if more than a minute has passed
+  let currentMinute = new Date().getMinutes();
+  if(currentMinute != $hsa.lastSavedIdx){
+    saveUserData();
+    $hsa.lastSavedIdx = currentMinute;
+  };
+
 };
+
+//Function to Post data - WEB SERVER SOLUTION              <<<<NOT YET CALLED
+function saveUserData(){
+
+  //Post async
+  const pst =  new Promise((resolve) => {
+
+    //get the userId for the data desired???
+
+
+    // Create an XMLHttpRequest object
+    const xhttp = new XMLHttpRequest();
+
+    // The callback function
+    xhttp.onload = function() {
+      
+      const jsonObject = JSON.parse(this.responseText);
+      console.log("Data saved remotely - ", jsonObject);
+
+      //resolve promise
+      resolve();
+      
+    };
+
+    // Post the request
+    xhttp.open("POST", savedDataUrl);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(JSON.stringify($hsa.allResponses));
+
+  });
+
+};
+
 
 
 
@@ -348,19 +430,19 @@ var substituteValue = function (inString, subLocator, subValue) {
 };
 
 
-          //FIRST NODE POST CALL!
-          let settings = {
-            "url": "http://localhost:5000/api/genres",
-            "method": "POST",
-            "timeout": 0,
-            "headers": {
-              "Content-Type": "application/json"
-            },
-            "data": JSON.stringify({
-              "name": "sci-fi"
-            }),
-          };
+          // //FIRST NODE POST CALL!
+          // let settings = {
+          //   "url": "http://localhost:5000/api/genres",
+          //   "method": "POST",
+          //   "timeout": 0,
+          //   "headers": {
+          //     "Content-Type": "application/json"
+          //   },
+          //   "data": JSON.stringify({
+          //     "name": "sci-fi"
+          //   }),
+          // };
 
-          $.ajax(settings).done(function (response) {
-            console.log("POSTED: ", response);
-          });
+          // $.ajax(settings).done(function (response) {
+          //   console.log("POSTED: ", response);
+          // });

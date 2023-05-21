@@ -11,7 +11,7 @@ import config from "config";  // environment configuration package
 // import { authenticate } from './middleware/authenticator.js';
 
 //check for PORT ENV variable
-const port = process.env.PORT || 3000;   // config.get('default-port')
+const port = process.env.PORT || config.get('default-port');
 
 const startupDebugger = debug("app:startup");
 // const dbDebugger = debug("app:db");
@@ -20,6 +20,12 @@ const startupDebugger = debug("app:startup");
 // app.set('view engine', 'pug');  //this is all that's required to use pug
 // app.set('views', './views');  //this is the path to the tempaltes
 
+					//CODE TO ALLOW CROSS ORIGIN REQUESTS - using port 5000 (env var PORT)
+					app.use(function(req, res, next) {
+					  res.header("Access-Control-Allow-Origin", "*");
+					  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+					  next();
+					});
 
 app.use(express.json());  // JSON middleware function
 // app.use(log);
@@ -27,6 +33,17 @@ app.use(express.json());  // JSON middleware function
 // app.use(helmet());            //not sure about this!
 app.use('/api/user-data', router);   //for any routes that start with "/api/user-data" use our "router" route
 // app.use('', home); //no need for this route
+
+// // Add Access Control Allow Origin headers
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "http://localhost:5000/questions.html");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// });
+
 
 //configuration
 console.log("Application name: " + config.get('name'));
