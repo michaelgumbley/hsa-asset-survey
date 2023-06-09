@@ -39,33 +39,35 @@
           <p >This survey is not optimised for small devices.  Please use a desktop or laptop to complete it. </p>
         </div>
 
-        <!-- <div id="login-issue-panel"></div> -->
-
+        <!-- Dynamically create a welcome statement -->
+        <div class="panel-generic">
+          <div id="welcomeStmt"></div>
+        </div>
         
-
         <div id="survey-container" class="panel-survey-form">
 
-          <h3 class="text-center form-heading" id="clickTrigger0">Key Information</h3> 
+    
+
+          <h3 class="text-center form-heading">Key Information</h3> 
 
           <p><b>What are we doing?</b> The intent of this form is to gather initial information related to HealthServe Australia's digital assets, also known as information assets.  We are creating an Information Asset Register as part of our Cyber Security assessment.</p>
-          <p><b>How long will it take?</b>  I'm not going to lie, it's probably not going to be quick.  Get yourself a tea or coffee before you go on.  It will probably take you 30 mins or so to complete this properly.  It's always easier to update something than it is to create it from scratch.</p>
           <p><b>What are information assets?</b>  Any data, device or application used to access, modify or store HSA information.  In our case this will likely include device and application assets that HSA does not own or license.  (More on that as we go.)</p>
-          <p><b>If in doubt, add it.</b>  As you answer the following questions, opt to include things that you are unsure about.  It is better for us to remove superfluous items later if they are not required, rather than missing important information.</p>
-          <p><b>A note on this process:</b> This form is being distributed internally only - directly to staff, board members and volunteers who interact with HSA information.  This survey has been authorised by the Board and the CEO, Michael Burke.</p>
+          <p><b>If in doubt, add it.</b>  As you answer the following questions, opt to include things that you are unsure about.  It is better for us to remove superfluous items later if they are not required, rather than miss important information.</p>
+          <p><b>A note on this process:</b> This form is being distributed internally only - directly to staff, board members and volunteers who interact with HSA information.  This survey is an activity that has been authorised by HSA's Board and CEO.</p>
 
           <hr>
 
-          <h3 class="text-center form-heading" id="clickTrigger1">Survey Questions</h3> 
+          <h3 class="text-center form-heading">Survey Questions</h3> 
 
-          <form id="survey-form">
+          <form id="survey-form" action>
 
-            <p><b>QUESTION 1: Please list the <u>DEVICES</u> you use to access HSA systems, and to create, read, modify or delete HSA documents & other files.</b></p>  
-            <p>Think about: laptops, PCs, tablets, phones, etc.</p> 
-            <p>Example - Device: Windows Laptop, Owner: mine</p> 
-            <p>Please list all devices you have used in the last 6 months.</p> 
+            <p><b>QUESTION 1: Please list the <u>DEVICES</u> you use to access HSA systems, and to create, read, modify or delete HSA documents and other files.</b></p>  
+            <p><b>Think about:</b> laptops, PCs, tablets, phones, etc.</p> 
+            <p><b>Example -</b> Device: Windows Laptop, Owner: mine</p> 
+            <p><i>Please list all devices you have used in the last 6 months.</i></p> 
 
-            <div class="row">
-              <div class="col-xs-8 responses-narrow">
+            <div class="row responses">
+              <div class="col-xs-8">
 
                 <div class="row input-header-row">
                   <div class="col-xs-1">
@@ -90,17 +92,82 @@
 
             </div>
 
-            <hr>
+            <hr class="q-hr">
 
-            <p id="clickTrigger2"><b>QUESTION 2: something something something something...</b></p>  
+            <p><b>QUESTION 2: Please list the <u>APPLICATIONS</u> you use to access, create, store and modify HSA information.</b></p>  
+            <p><b>Think about:</b> office software - MS Office, Google Docs, Google Drive, Dropbox, as well as software for accounting, website content management, video and image editing, video conferencing, etc.</p>
+            <p><b>No need to include</b> applications that exist on a device regardless of HSA use, such as the operating system or virus protection software.</p>
+            <p><b>Example -</b> Application: MS Office, Owner: mine, Usage: Working with HSA Word and Excel files</p> 
+
+            <div class="row responses">
+              <div class="col-xs-12">
+
+                <div class="row input-header-row">
+                  <div class="col-xs-1">
+                    <label></label>
+                  </div>
+                  <div class="col-xs-3">
+                    <label>Application</label>
+                  </div>
+                  <div class="col-xs-3">
+                    <label>Owner</label>
+                  </div>
+                  <div class="col-xs-4">
+                    <label>Usage</label>
+                  </div>
+                </div>
+                
+                <!-- Dynamically add Q1 input rows here -->
+                <div id="q2InputRows"></div>
+                
+              </div> 
+
+              <!-- <div class="col-xs-4"> </div>  Rightside response row filler --> 
+
+            </div>
+           
+            
+
+            <hr class="q-hr">
+
+
+            <p><b>QUESTION 3: Please list all the <u>DATA/FILES</u> you access, create and modify as part of your role.</b></p>  
+            <p><b>Think about:</b> files you use and/or manage, as well as data related to the applications above promotional content. </p>
+            <p><b>There is no need to list every individual file -</b> just list folder groups - e.g. board reports, financial reports, program proposals, website program content. </p>
+            <p><b>Example -</b> Data/File Group: Financial Reports, Short Description: Created from Xero data to enable organisational governance</p> 
           
+            <div class="row responses">
+              <div class="col-xs-12">
 
+                <div class="row input-header-row">
+                  <div class="col-xs-1">
+                    <label></label>
+                  </div>
+                  <div class="col-xs-3">
+                    <label>Data/File Group</label>
+                  </div>
+                  <div class="col-xs-7">
+                    <label>Short Description</label>
+                  </div>
+                </div>
+                
+                <!-- Dynamically add Q1 input rows here -->
+                <div id="q3InputRows"></div>
+
+
+                
+              </div> 
+
+              <!-- <div class="col-xs-4"> </div>  Rightside response row filler --> 
+
+            </div>
 
             
 
             <div class="row submit-row">
               <div class="col-xs-12">
-                <input class="submit-btn" type="submit" value="Submit">
+                <input class="submit-btn" type="button" value="Submit" onclick="submitForm()">
+                <input class="submit-btn" type="button" value="Save" onclick="saveForm()">
               </div>
             </div>
             
@@ -108,7 +175,7 @@
 
         </div>
 
-        <div class="v-space-200"></div>
+        <!-- <div class="v-space-200"></div> -->
 
       </div> <!-- /.container-fluid -->
     </div> <!-- /#main content -->

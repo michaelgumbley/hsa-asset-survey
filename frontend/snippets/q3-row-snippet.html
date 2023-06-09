@@ -2,13 +2,13 @@
   <div class="col-xs-1 rowId">
     <label>{{RowNum}}</label>
   </div>
-  <div class="col-xs-5">
-    <input type="text" id="q1Device{{RowNum}}" name="device{{RowNum}}" size="24">
+  <div class="col-xs-3">
+    <input type="text" id="q3Dataset{{RowNum}}" name="dataset{{RowNum}}" size="25" onblur="gatherResponses()">
   </div>
-  <div class="col-xs-5">
-    <input type="text" id="q1Owner{{RowNum}}" name="owner{{RowNum}}" size="24">
+  <div class="col-xs-7">
+    <input type="text" id="q3Description{{RowNum}}" name="description{{RowNum}}" size="64" onblur="gatherResponses()">
   </div>
   <div class="col-xs-1">
-    <button type="button" id="q1AddRowBtn{{RowNum}}">+</button>
+    <button type="button" id="q3AddRowBtn{{RowNum}}">+</button>
   </div>
 </div>

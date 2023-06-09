@@ -17,18 +17,18 @@ import Joi from 'joi';       // validation package using schemas
 // };
 // funcName(); //call async function
 
-router.get('/',  async function(req, res) {     // this route is assumed "/api/user-data"
-	try {
-	  const filePath = new URL('../user-data/saved-data.json', import.meta.url);  //needs to be a URL
-	  const contents = await readFile(filePath, { encoding: 'utf8' });
-	  console.log(contents);
-	  res.send(contents);
-	} 
-	catch (err) {
-	  console.error(err.message);
-	}
+// router.get('/',  async function(req, res) {     // this route is assumed "/api/user-data"
+// 	try {
+// 	  const filePath = new URL('../user-data/saved-data.json', import.meta.url);  //needs to be a URL
+// 	  const contents = await readFile(filePath, { encoding: 'utf8' });
+// 	  console.log(contents);
+// 	  res.send(contents);
+// 	} 
+// 	catch (err) {
+// 	  console.error(err.message);
+// 	}
 
-}); 
+// }); 
 
 
 router.get('/:id',  async function(req, res) {     // this route is assumed "/api/user-data"
@@ -44,7 +44,18 @@ router.get('/:id',  async function(req, res) {     // this route is assumed "/ap
 	  res.send(contents);
 	} 
 	catch (err) {
-	  console.error(err.message);
+
+		if(err.errno == -4058){
+			console.log("Caught - no such file");
+			// let defaultJson = '{ "q1": [], "q2": [], "q3": [] }'
+			// res.send(defaultJson);
+			res.send();
+		}
+		else{
+			console.error(err.errno + err.message);
+	  	res.status(400).send("Data API Error ");
+		}
+	  
 	}
 
 }); 
@@ -81,6 +92,7 @@ router.post('/:id', async function(req, res){
 	} 
 	catch (err) {
 	  console.error("My error: ",err.message);
+	  res.status(400).send("Data API Error ");
 	}  
 
 });

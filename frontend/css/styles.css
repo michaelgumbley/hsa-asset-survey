@@ -62,11 +62,15 @@ body {
 .submit-row .submit-btn{
   font-size: 1.1em;
   padding: 2px 15px 2px 15px;
+ /* margin-left: 20;
+  margin-right: 20;
+  width: 100;*/
+}
 }
 
-.rowId{
+/*.rowId{
   align-content: center;
-}
+}*/
 
 
 /***** LOGIN PAGE SPECIFIC *****/
@@ -131,11 +135,19 @@ body {
 
 /***** SURVEY PAGE SPECIFIC *****/
 
-
 /** SURVEY FORM **/
+.panel-generic {
+  margin-top: 25px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px;
+  width: 980px;
+  font-size: 1.1em;
+}
+
 .panel-survey-form {
-  margin-top: 50px;
-  margin-bottom: 50px;
+  margin-top: 10px;
+  margin-bottom: 70px;
   margin-left: auto;
   margin-right: auto;
   padding: 10px;
@@ -146,7 +158,22 @@ body {
   border-color: #6666CC;
 }
 
-.responses-narrow{
-  background-color: lemonchiffon;
+.responses{
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-left: 0px;
+  margin-right: 0px;
+/*  background-color: #C2DFFF;*/
+/*  background-color: #9AB7F6;*/
+/*  background-color: #A5ECFF;*/
 }
 
+.q-hr {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}
+ 
+.final-note {
+  margin-top: 30px;
+  margin-bottom: 30px;
+}

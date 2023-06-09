@@ -80,8 +80,8 @@ function checkChallenge(){
         }
         else{
             //show fail msg
-            document.querySelector("#securityOutcome").style = "color:red;"
-            document.querySelector("#securityOutcome").innerHTML = "Input is incorrect. Try again."
+            document.querySelector("#securityOutcome").style = "color:red;";
+            document.querySelector("#securityOutcome").innerHTML = "Input is incorrect. Try again.";
             document.querySelector("#securityInput").focus();
         }
     }
@@ -100,6 +100,7 @@ function resetChallenge(){
 
     //clear input box
     document.querySelector("#securityInput").value = "";
+    document.querySelector("#securityOutcome").innerHTML = "";
 
     //reset canvas
     resetCanvas();
@@ -162,7 +163,7 @@ function addSubmitListener(){
             console.log(token);
             
             //open with token
-            window.open('questions.html' + token); //opens the target page if id & password match
+            window.location.assign('questions.html' + token);  //opens the target page if id & password match
         }
         else {
             alert("Username or password error!");/*display error message*/

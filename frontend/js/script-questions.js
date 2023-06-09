@@ -1,10 +1,18 @@
-const savedDataUrl = "http://localhost:5000/api/user-data/12"; 
+//Module-level Variables
+const savedDataUrlStub = "http://localhost:5000/api/user-data/"; 
 $hsa = {};
-$hsa.q1LastRowNum = 0;
+$hsa.authenticated = false;
+$hsa.q1 = {};
+$hsa.q2 = {};
+$hsa.q3 = {};
+// $hsa.q1.lastRowNum = 0; //needed?
+// $hsa.q2.lastRowNum = 0; //needed?
+// $hsa.q3.lastRowNum = 0; //needed?
 $hsa.lastSavedIdx = -1;
+let savedDataUrl = "";
+
 
 // ***** IFFE SETUP CODE ***** //
-
 (function (global) { 
 	//immediately-invoked function: executes immediately, and only once, then kills local resources
 
@@ -13,10 +21,6 @@ $hsa.lastSavedIdx = -1;
   const q2RowHtmlUrl = "snippets/q2-row-snippet.html";
   const q3RowHtmlUrl = "snippets/q3-row-snippet.html";
   // const savedDataUrl = "resources/saved-data.json";
-  
-  // global.$hsa = {};
-  // $hsa.q1LastRowNum = 0;
-  // $hsa.lastSavedIdx = -1;
 
   //SETUP STEP 1 - Get resourses 
 
@@ -27,7 +31,7 @@ $hsa.lastSavedIdx = -1;
 	    q1RowHtmlUrl,
 	    function (snippetHtml) {
 	      //save snippet to resources object
-	      $hsa.q1RowHtml = snippetHtml;
+	      $hsa.q1.rowHtml = snippetHtml;
 	      //resolve promise
 	      resolve(); 
 	    },
@@ -41,7 +45,7 @@ $hsa.lastSavedIdx = -1;
 	    q2RowHtmlUrl,
 	    function (snippetHtml) {
 	      //save snippet to resources object
-	      $hsa.q2RowHtml = snippetHtml;
+	      $hsa.q2.rowHtml = snippetHtml;
 	      //resolve promise
 	      resolve();
 	    },
@@ -55,63 +59,59 @@ $hsa.lastSavedIdx = -1;
 	    q3RowHtmlUrl, 
 	    function (snippetHtml) {
 	      //save snippet to resources object
-	      $hsa.q3RowHtml = snippetHtml;
+	      $hsa.q3.rowHtml = snippetHtml;
 	      //resolve promise
 	      resolve();
 	    },
 	    false); 
 	});
  
-	// //Get saved data - FRONT END SOLUTION
-	// const sd =  new Promise((resolve) => {
-
-	// 	//compile the correct URL first, using the userId???
-
-	// 	//ajax call
-	// 	$ajaxUtils.sendGetRequest(
-  //     savedDataUrl,
-  //     function (jsonObject) {
-  //       //parse and store save json object
-  //       $hsa.savedData = jsonObject;
-  //       console.log("Saved Data - ", jsonObject);
-
-  //       //resolve promise
-	//       resolve();
-  //     },
-  //     true); // True here to process as JSON.
-	// });
 
   //Get saved data - WEB SERVER SOLUTION
   const sd =  new Promise((resolve) => {
 
-    //get the userId for the data desired???
+    //check authentication & get the userId for the daved data
+    checkAuthentication();
 
+    savedDataUrl = savedDataUrlStub + $hsa.userid.toString();
+    console.log(savedDataUrl);
 
     // Create an XMLHttpRequest object
     const xhttp = new XMLHttpRequest();
 
     // The callback function
     xhttp.onload = function() {
-      // Here you can use the Data
-      const jsonObject = JSON.parse(this.responseText);
-      // $hsa.savedData = jsonObject; //all
-      $hsa.allResponses = jsonObject; //by user
-      console.log("API Loaded Data - ", jsonObject);
+      try{
+        //get responseText
+        let responseText = this.responseText;
+
+        // Check for valid response
+        if(responseText == ""){
+          console.log("Defaulting return data");
+          responseText = '{ "q1": [], "q2": [], "q3": [] }';
+        };
+        // Use the returned Data
+        const jsonObject = JSON.parse(responseText);
+        $hsa.allResponses = jsonObject; //by user
+        console.log("API Loaded Data - ", jsonObject);
+      }
+      catch(err){
+        console.log("Caught the async error!");
+        throw(err);
+      };
 
       //resolve promise
       resolve();
+      console.log("GET resolved");
       
     };
-
+    
     // Send the request
     xhttp.open("GET", savedDataUrl);
     xhttp.send();
+    
 
   });
-
-
-
-
 
   
 
@@ -119,26 +119,6 @@ $hsa.lastSavedIdx = -1;
   Promise.all([s1, s2, s3, sd])
 	.then(result => checkDOMReadyState())
 	.catch(err => console.log('Error:', err.message));
-
-
-                  // //FIRST NODE GET CALL!
-                  // const nodeUrl = "http://localhost:5000/api/genres"
-                  // const p = new Promise((resolve, reject) => {
-                  //   //ajax call
-                  //   $ajaxUtils.sendGetRequest(
-                  //     nodeUrl,
-                  //     function (genres) {
-                  //       //resolve promise
-                  //       resolve(genres); 
-                  //     },
-                  //     false); // False here for regular HTML from the server(no need to process JSON).
-                  // });
-
-                  // p
-                  // .then(result => console.log('result = ', result))
-                  // .catch(err => console.log('Error', err.message));
-
-
 
 
 	function checkDOMReadyState(){
@@ -159,61 +139,112 @@ $hsa.lastSavedIdx = -1;
 	//SETUP STEP 2 - FINALISATION - called from checkDOMReadyState() after all resources are loaded
 	function finaliseSetup(){
 
-		console.log("Finalising Setup!!!")
+		console.log("Finalising Setup!!!");
+    console.log("Authenticated = " + $hsa.authenticated);
 
-		//call checkAuthentication() - needs return
-    //check authentication
-    checkAuthentication();
-    console.log($hsa.userid);
+    //confirm authentication
+    if(!$hsa.authenticated){
+      //Repace inner html with authentication issue msg
+      document.querySelector("#survey-container").innerHTML = 
+        "<h3>Authentication issue!</h3><h4>Please return to the <a href='index.html'>login page</a> to reauthenticate</h4>";
 
-    // //get responses for this userid  <<< FOR ALL DATA
-    // console.log($hsa.savedData[$hsa.userid]);
-    // $hsa.allResponses = $hsa.savedData[$hsa.userid];
+      //stop further execution
+      return;
+    }
 
     //LOAD Q1
     // add required rows
-    $hsa.q1LastRowNum = 0;
-    let rowsNeeded = $hsa.allResponses.q1.length + 1;
+    $hsa.q1.lastRowNum = 0;
+    let q1RowsNeeded = $hsa.allResponses.q1.length + 1;
     
-    console.log("rowsNeeded = " + rowsNeeded);
+    console.log("Q1rowsNeeded = " + q1RowsNeeded);
 
-    while ($hsa.q1LastRowNum < rowsNeeded){
+    while ($hsa.q1.lastRowNum < q1RowsNeeded){
       //increment last row
-      $hsa.q1LastRowNum++;
+      $hsa.q1.lastRowNum++;
 
-      console.log("Adding Q1 response row " + $hsa.q1LastRowNum + " for filling.");
+      console.log("Adding Q1 response row " + $hsa.q1.lastRowNum + " for filling.");
       //add it
-      buildNewRowHtml ($hsa.q1RowHtml, $hsa.q1LastRowNum, "#q1InputRows", "q1AddRowBtn"); 
+      buildNewRowHtml ("q1");
+    };
+
+    //LOAD Q2
+    // add required rows
+    $hsa.q2.lastRowNum = 0;
+    let q2RowsNeeded = $hsa.allResponses.q2.length + 1;
+    
+    console.log("Q2rowsNeeded = " + q2RowsNeeded);
+
+    while ($hsa.q2.lastRowNum < q2RowsNeeded){
+      //increment last row
+      $hsa.q2.lastRowNum++; 
+
+      console.log("Adding Q2 response row " + $hsa.q2.lastRowNum + " for filling.");
+      //add it
+      buildNewRowHtml ("q2");
+    };
+
+    //LOAD Q3
+    // add required rows
+    $hsa.q3.lastRowNum = 0;
+    let q3RowsNeeded = $hsa.allResponses.q3.length + 1;
+    
+    console.log("Q3rowsNeeded = " + q3RowsNeeded);
+
+    while ($hsa.q3.lastRowNum < q3RowsNeeded){
+      //increment last row
+      $hsa.q3.lastRowNum++;
+
+      console.log("Adding Q3 response row " + $hsa.q3.lastRowNum + " for filling.");
+      //add it 
+      buildNewRowHtml ("q3");
     };
 
     //fill the rows
-    fillQ1Responses();
+    fillResponses();
+
 
 	};
 
 	//CHECK AUTHENTICATION called from finaliseSetup() once per page load, after DOM loaded
 	function checkAuthentication(){
-    //check authentication
-    const queryString = window.location.search;
-    console.log(queryString);
-    let params = queryString.slice(1).split("|");
-    let d = new Date();
-    let minsToday = d.getMinutes() + (d.getHours() * 60);
-    let dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+    try{
+      //check authentication
+      const queryString = window.location.search;
+      console.log(queryString);
+      let params = queryString.slice(1).split("|");
+      let d = new Date();
+      let minsToday = d.getMinutes() + (d.getHours() * 60);
+      let dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
 
-    if(dayOfYear == params[0] && minsToday >= params[1] && minsToday < (params[1] +30)){ //keep valid for 30 mins
-      console.log("Hello " + params[3] + "  id: " + params[2]);
-      //set id & username
-      $hsa.userid = params[2];
-      $hsa.username = params[3];
+      if(dayOfYear == params[0] && minsToday >= params[1] && minsToday < (params[1] +30)){ //keep valid for 30 mins
+        console.log("check auth - name: " + params[3] + "  id: " + params[2]);
+        //set id & username
+        $hsa.userid = params[2];
+        $hsa.username = params[3];
+
+        if($hsa.userid != undefined && $hsa.username != undefined){
+          //all is well
+          $hsa.authenticated = true;
+
+          //Set welcomeStmt
+          document.querySelector("#welcomeStmt").innerHTML = 
+            "<p>Hi " + $hsa.username + ", thank you for taking the time to answer this survey.</p>";
+        };
+        
+      }
+      else{
+        console.log("Authentication issues! " + dayOfYear + " " + params[0] + " | " +  minsToday + " " +  params[1]);
+        //set uid to non-errorring value
+        $hsa.userid = 0;
+      };
+
     }
-    else{
-      console.log("Authentication issues! " + dayOfYear + " " + params[0] + " | " +  minsToday + " " +  params[1]);
-
-      //Repace inner html with authentication issue msg
-      document.querySelector("#survey-container").innerHTML = 
-        "<h3>Authentication issue!</h3><h4>Please return to the <a href='index.html'>login page</a> to reauthenticate</h4>";
+    catch(err){
+      //set uid to non-errorring value
+      $hsa.userid = 0;
     };
+    
   };
 
 
@@ -225,33 +256,34 @@ $hsa.lastSavedIdx = -1;
 // ***** CORE PAGE LOGIC FUNCTIONS ***** //
 
 //function to add dynamic NewRowBtnListener to new buttons - assumes targetSelector contains "AddRowBtn" pattern
-function addNewRowBtnListener(targetSelector, newRowContainerId){
+function addNewRowBtnListener(targetSelector, questionId){
 
+  questionId = questionId.toLowerCase();
   targetSelector = hashPrefix(targetSelector, true);
   document.querySelector(targetSelector).addEventListener("click", function (event) { 
     console.log(targetSelector + " Click dynamic event!");
 
-    //remove the line number at the end of targetSelector and ensure no hash prefix
-    var addNewRowBtnIdPrefix =  targetSelector.slice(0, targetSelector.lastIndexOf("n") + 1); 
-    addNewRowBtnIdPrefix = hashPrefix(addNewRowBtnIdPrefix, false);
-
-    // buildNewRowHtml (q1RowHtmlUrl, (q1LastRowNum + 1), newRowContainerId, addNewRowBtnIdPrefix);
     //increment last row
-    $hsa.q1LastRowNum++;
+    $hsa[questionId].lastRowNum++;
+
     //now add it
-    buildNewRowHtml ($hsa.q1RowHtml, $hsa.q1LastRowNum, newRowContainerId, addNewRowBtnIdPrefix);
-    //refill the data
-    fillQ1Responses();
+    buildNewRowHtml (questionId);
+
+    //refill the data                                                                 
+    fillResponses();
 
   });
 }
 
 
 // Function to Build HTML response rows
-function buildNewRowHtml (snippetHtml, newRowNum, destSelector, addNewRowBtnIdPrefix) {
+function buildNewRowHtml (questionId) {
 
-  destSelector = hashPrefix(destSelector, true); //needs hash
-  addNewRowBtnIdPrefix = hashPrefix(addNewRowBtnIdPrefix, false); //no hash
+  questionId = questionId.toLowerCase();
+  let snippetHtml = $hsa[questionId].rowHtml;
+  let newRowNum = $hsa[questionId].lastRowNum;
+  let destSelector = "#" + questionId + "InputRows";
+  let addNewRowBtnIdPrefix = questionId + "AddRowBtn";
 
   //STEP 1: substitute now row numbers
   var htmlToAppend = substituteValue(snippetHtml, "RowNum", newRowNum);
@@ -268,13 +300,13 @@ function buildNewRowHtml (snippetHtml, newRowNum, destSelector, addNewRowBtnIdPr
 
   // STEP 4: add dynamic listener
   var btnSelector = addNewRowBtnIdPrefix + newRowNum; 
-  addNewRowBtnListener(btnSelector, destSelector);
+  addNewRowBtnListener(btnSelector, questionId);
     
 };
 
 
 //function to fill the existing responses into the grids
-function fillQ1Responses(){
+function fillResponses(){
 
   //Q1 loop
   const q1RespObjArray = $hsa.allResponses.q1;
@@ -286,10 +318,10 @@ function fillQ1Responses(){
     q1ResponseLine++;
 
     //add response row if needed 
-    if ($hsa.q1LastRowNum < q1ResponseLine){
+    if ($hsa.q1.lastRowNum < q1ResponseLine){
       console.log("Adding Q1 response row for filling.");
-      buildNewRowHtml ($hsa.q1RowHtml, q1ResponseLine, "#q1InputRows", "q1AddRowBtn");
-      $hsa.q1LastRowNum++;
+      buildNewRowHtml ("q1");
+      $hsa.q1.lastRowNum++;
     };
 
 
@@ -297,11 +329,53 @@ function fillQ1Responses(){
     document.querySelector("#q1Device" + q1ResponseLine).value = q1RespObjArray[i].device; 
     document.querySelector("#q1Owner" + q1ResponseLine).value = q1RespObjArray[i].owner;
 
-  };
+  }; //end loop
 
   //TODO: Q2 loop
+  const q2RespObjArray = $hsa.allResponses.q2;
+  var q2ResponseLine = 0;
+  console.log("fillQ2Responses");
 
-  //TODO: Q3 loop
+  for (let i = 0; i < q2RespObjArray.length; i++){  //standard loop for arrays!
+    //new response line
+    q2ResponseLine++;
+
+    //add response row if needed 
+    if ($hsa.q2.lastRowNum < q2ResponseLine){
+      console.log("Adding Q2 response row for filling.");
+      buildNewRowHtml ("q2");
+      $hsa.q2.lastRowNum++;
+    };
+
+
+    //fill row
+    document.querySelector("#q2App" + q2ResponseLine).value = q2RespObjArray[i].app; 
+    document.querySelector("#q2Owner" + q2ResponseLine).value = q2RespObjArray[i].owner;
+    document.querySelector("#q2Usage" + q2ResponseLine).value = q2RespObjArray[i].usage;
+
+  }; //end loop
+
+  //Q3 loop
+  const q3RespObjArray = $hsa.allResponses.q3;
+  var q3ResponseLine = 0;
+  console.log("fillQ3Responses");
+
+  for (let i = 0; i < q3RespObjArray.length; i++){  //standard loop for arrays!
+    //new response line
+    q3ResponseLine++;
+
+    //add response row if needed 
+    if ($hsa.q3.lastRowNum < q3ResponseLine){
+      console.log("Adding Q3 response row for filling.");
+      buildNewRowHtml ("q3");
+      $hsa.q3.lastRowNum++;
+    };
+
+    //fill row
+    document.querySelector("#q3Dataset" + q3ResponseLine).value = q3RespObjArray[i].dataset; 
+    document.querySelector("#q3Description" + q3ResponseLine).value = q3RespObjArray[i].description;
+
+  }; //end loop
 
 
 };
@@ -309,14 +383,14 @@ function fillQ1Responses(){
 
 
 //function to gather responses into a JSON object (on save or submit)
-function gatherResponses(){
+function gatherResponses(forceSave = false){
 
   const allResponses = {q1: [], q2: [], q3: [] };
 
   console.log("gatherResponses");
 
   //Q1 loop
-  for (let i = 1; i <= $hsa.q1LastRowNum; i++) {
+  for (let i = 1; i <= $hsa.q1.lastRowNum; i++) {
 
     let deviceId = "device" + i; 
     let deviceVal = document.querySelector("#q1Device" + i).value;
@@ -329,10 +403,34 @@ function gatherResponses(){
     };
   }; //end for
 
-  //TODO: Q2 loop
+  //Q2 loop
+  for (let i = 1; i <= $hsa.q2.lastRowNum; i++) {
 
-  //TODO: Q3 loop
+    let appId = "app" + i; 
+    let appVal = document.querySelector("#q2App" + i).value;
+    let ownerVal = document.querySelector("#q2Owner" + i).value;
+    let usageVal = document.querySelector("#q2Usage" + i).value;
 
+    //add if not empty
+    if((appVal + ownerVal + usageVal).trim().length > 0 ){
+      //add to allResponses
+      allResponses.q2.push( {app: appVal.trim(), owner: ownerVal.trim(), usage: usageVal.trim()} );
+    };
+  }; //end for
+
+  //Q3 loop
+  for (let i = 1; i <= $hsa.q3.lastRowNum; i++) {
+
+    let datasetId = "dataset" + i; 
+    let datasetVal = document.querySelector("#q3Dataset" + i).value;
+    let descriptionVal = document.querySelector("#q3Description" + i).value;
+
+    //add if not empty
+    if((datasetVal + descriptionVal).trim().length > 0 ){
+      //add to allResponses
+      allResponses.q3.push( {dataset: datasetVal.trim(), description: descriptionVal.trim()} );
+    };
+  }; //end for
 
 
   //add to object instance
@@ -340,9 +438,9 @@ function gatherResponses(){
 
   console.log("Gathered data: ", allResponses);
 
-  //Save to the server if more than a minute has passed
+  //Save to the server if more than a minute has passed OR forceSave is true
   let currentMinute = new Date().getMinutes();
-  if(currentMinute != $hsa.lastSavedIdx){
+  if(currentMinute != $hsa.lastSavedIdx || forceSave){ 
     saveUserData();
     $hsa.lastSavedIdx = currentMinute;
   };
@@ -354,9 +452,6 @@ function saveUserData(){
 
   //Post async
   const pst =  new Promise((resolve) => {
-
-    //get the userId for the data desired???
-
 
     // Create an XMLHttpRequest object
     const xhttp = new XMLHttpRequest();
@@ -378,6 +473,23 @@ function saveUserData(){
     xhttp.send(JSON.stringify($hsa.allResponses));
 
   });
+
+};
+
+//function to handle the sumbit button click
+function submitForm(){
+  console.log("Form submitting!");
+
+  if (confirm("Please confirm if you are happy to submit this survey")) {
+    console.log("You pressed OK!");
+    saveUserData();
+    window.location.assign("final.html");
+  } 
+  else {
+    console.log("You pressed Cancel!");
+    //do nothing
+  };
+
 
 };
 
@@ -430,19 +542,3 @@ var substituteValue = function (inString, subLocator, subValue) {
 };
 
 
-          // //FIRST NODE POST CALL!
-          // let settings = {
-          //   "url": "http://localhost:5000/api/genres",
-          //   "method": "POST",
-          //   "timeout": 0,
-          //   "headers": {
-          //     "Content-Type": "application/json"
-          //   },
-          //   "data": JSON.stringify({
-          //     "name": "sci-fi"
-          //   }),
-          // };
-
-          // $.ajax(settings).done(function (response) {
-          //   console.log("POSTED: ", response);
-          // });
