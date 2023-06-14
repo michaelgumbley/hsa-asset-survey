@@ -66,11 +66,7 @@ body {
   margin-right: 20;
   width: 100;*/
 }
-}
 
-/*.rowId{
-  align-content: center;
-}*/
 
 
 /***** LOGIN PAGE SPECIFIC *****/
@@ -157,6 +153,18 @@ body {
   border-style: solid;
   border-color: #6666CC;
 }
+
+.rowId{
+  padding-left: 0px;
+  padding-right: 5px;
+  text-align: right;
+}
+
+.btn-left{ 
+  padding-left: 0px;
+}
+
+
 
 .responses{
   padding-top: 10px;

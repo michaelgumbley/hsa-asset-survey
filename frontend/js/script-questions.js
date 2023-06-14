@@ -1,5 +1,6 @@
 //Module-level Variables
 const savedDataUrlStub = "http://localhost:5000/api/user-data/"; 
+const checkTokenUrl = "http://localhost:5000/api/auth/check-token";
 $hsa = {};
 $hsa.authenticated = false;
 $hsa.q1 = {};
@@ -65,60 +66,117 @@ let savedDataUrl = "";
 	    },
 	    false); 
 	});
- 
 
-  //Get saved data - WEB SERVER SOLUTION
-  const sd =  new Promise((resolve) => {
-
-    //check authentication & get the userId for the daved data
-    checkAuthentication();
-
-    savedDataUrl = savedDataUrlStub + $hsa.userid.toString();
-    console.log(savedDataUrl);
+  //Post to check authentication
+  const auth =  new Promise((resolve) => {
 
     // Create an XMLHttpRequest object
     const xhttp = new XMLHttpRequest();
 
     // The callback function
     xhttp.onload = function() {
-      try{
-        //get responseText
-        let responseText = this.responseText;
+      
+      if(this.status == 200){
+        let userObj = JSON.parse(this.responseText);
+        console.log("Returned - ", JSON.stringify(userObj));
 
-        // Check for valid response
-        if(responseText == ""){
-          console.log("Defaulting return data");
-          responseText = '{ "q1": [], "q2": [], "q3": [] }';
-        };
-        // Use the returned Data
-        const jsonObject = JSON.parse(responseText);
-        $hsa.allResponses = jsonObject; //by user
-        console.log("API Loaded Data - ", jsonObject);
+        //save authenticated user info
+        $hsa.userid = userObj.id;
+        $hsa.username = userObj.name;
+        $hsa.authenticated = true;
+
+        //Set welcomeStmt
+        document.querySelector("#welcomeStmt").innerHTML = 
+        "<p>Hi " + $hsa.username + ", thank you for taking the time to answer this survey.</p>";
       }
-      catch(err){
-        console.log("Caught the async error!");
-        throw(err);
+      else if(this.status == 401){
+        //authentication issue
+        alert("Error: " + this.responseText);
+        $hsa.userid = 0;
+      }
+      else{
+        //other error type
+        alert("Check-token API call error - status: " + this.status);
+        $hsa.userid = 0;
       };
 
       //resolve promise
       resolve();
-      console.log("GET resolved");
       
-    };
-    
-    // Send the request
-    xhttp.open("GET", savedDataUrl);
-    xhttp.send();
-    
+    }; //end onload function
 
-  });
+    //form up the token payload
+    const tokenString = window.location.search.slice(1);  //queryString minus the "?"
+    const tokenPayload = {
+        token: tokenString
+    };
+
+    // Post the request
+    xhttp.open("POST", checkTokenUrl);
+    xhttp.setRequestHeader("Content-type", "application/json");
+    xhttp.send(JSON.stringify(tokenPayload));
+
+  }); //end Promise
 
   
 
 	//Once all resources have been loaded
-  Promise.all([s1, s2, s3, sd])
-	.then(result => checkDOMReadyState())
+  Promise.all([s1, s2, s3, auth])
+	.then(result => loadSavedData())
 	.catch(err => console.log('Error:', err.message));
+
+
+  //async function to retrieve saved data before calling checkDOMReadyState()
+  async function loadSavedData(){
+
+    //Get saved data - server API solution
+    const sdPromise =  new Promise((resolve) => {
+
+      // Create an XMLHttpRequest object
+      const xhttp = new XMLHttpRequest();
+
+      // The callback function
+      xhttp.onload = function() {
+        try{
+          //get responseText
+          let responseText = this.responseText;
+
+          // Check for valid response
+          if(responseText == ""){
+            console.log("Defaulting return data");
+            responseText = '{ "q1": [], "q2": [], "q3": [] }';
+          };
+          // Use the returned Data
+          const jsonObject = JSON.parse(responseText);
+          $hsa.allResponses = jsonObject; //by user
+          console.log("API Loaded Data - ", jsonObject);
+        }
+        catch(err){
+          console.log("Caught the async error!");
+          throw(err);
+        };
+
+        //resolve promise
+        resolve();
+        console.log("GET resolved");
+        
+      };
+      
+      //construct the URL
+      savedDataUrl = savedDataUrlStub + $hsa.userid.toString();
+      console.log(savedDataUrl);
+
+      // Send the request
+      xhttp.open("GET", savedDataUrl);
+      xhttp.send();
+      
+    }); //end promise
+
+    sdPromise
+    .then(result => checkDOMReadyState())
+    .catch(err => console.log('Error retrieving data:', err.message));
+
+  };
 
 
 	function checkDOMReadyState(){
@@ -206,46 +264,99 @@ let savedDataUrl = "";
 
 	};
 
-	//CHECK AUTHENTICATION called from finaliseSetup() once per page load, after DOM loaded
-	function checkAuthentication(){
-    try{
-      //check authentication
-      const queryString = window.location.search;
-      console.log(queryString);
-      let params = queryString.slice(1).split("|");
-      let d = new Date();
-      let minsToday = d.getMinutes() + (d.getHours() * 60);
-      let dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
+	// //CHECK AUTHENTICATION called from "get saved data" code once per page load, after DOM loaded
+	// function checkAuthentication(){
+  //   // try{
+  //   //   //check authentication
+  //   //   const queryString = window.location.search;
+  //   //   console.log(queryString);
+  //   //   let params = queryString.slice(1).split("|");
+  //   //   let d = new Date();
+  //   //   let minsToday = d.getMinutes() + (d.getHours() * 60);
+  //   //   let dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
 
-      if(dayOfYear == params[0] && minsToday >= params[1] && minsToday < (params[1] +30)){ //keep valid for 30 mins
-        console.log("check auth - name: " + params[3] + "  id: " + params[2]);
-        //set id & username
-        $hsa.userid = params[2];
-        $hsa.username = params[3];
+  //   //   if(dayOfYear == params[0] && minsToday >= params[1] && minsToday < (params[1] +30)){ //keep valid for 30 mins
+  //   //     console.log("check auth - name: " + params[3] + "  id: " + params[2]);
+  //   //     //set id & username
+  //   //     $hsa.userid = params[2];
+  //   //     $hsa.username = params[3];
 
-        if($hsa.userid != undefined && $hsa.username != undefined){
-          //all is well
-          $hsa.authenticated = true;
+  //   //     if($hsa.userid != undefined && $hsa.username != undefined){
+  //   //       //all is well
+  //   //       $hsa.authenticated = true;
 
-          //Set welcomeStmt
-          document.querySelector("#welcomeStmt").innerHTML = 
-            "<p>Hi " + $hsa.username + ", thank you for taking the time to answer this survey.</p>";
-        };
+  //   //       //Set welcomeStmt
+  //   //       document.querySelector("#welcomeStmt").innerHTML = 
+  //   //         "<p>Hi " + $hsa.username + ", thank you for taking the time to answer this survey.</p>";
+  //   //     };
         
-      }
-      else{
-        console.log("Authentication issues! " + dayOfYear + " " + params[0] + " | " +  minsToday + " " +  params[1]);
-        //set uid to non-errorring value
-        $hsa.userid = 0;
-      };
+  //   //   }
+  //   //   else{
+  //   //     console.log("Authentication issues! " + dayOfYear + " " + params[0] + " | " +  minsToday + " " +  params[1]);
+  //   //     //set uid to non-errorring value
+  //   //     $hsa.userid = 0;
+  //   //   };
 
-    }
-    catch(err){
-      //set uid to non-errorring value
-      $hsa.userid = 0;
-    };
+  //   // }
+  //   // catch(err){
+  //   //   //set uid to non-errorring value
+  //   //   $hsa.userid = 0;
+  //   // };
+
     
-  };
+
+  //   //Post to check authentication
+  //   const auth =  new Promise((resolve) => {
+
+  //       // Create an XMLHttpRequest object
+  //       const xhttp = new XMLHttpRequest();
+
+  //       // The callback function
+  //       xhttp.onload = function() {
+          
+  //           if(this.status == 200){
+  //               let userObj = JSON.parse(this.responseText);
+  //               console.log("Returned - ", userObj.stringify());
+
+  //               //save authenticated user info
+  //               $hsa.userid = userObj.id;
+  //               $hsa.username = userObj.name;
+  //               $hsa.authenticated = true;
+
+  //               //Set welcomeStmt
+  //               document.querySelector("#welcomeStmt").innerHTML = 
+  //               "<p>Hi " + $hsa.username + ", thank you for taking the time to answer this survey.</p>";
+  //           }
+  //           else if(this.status == 401){
+  //             //authentication issue
+  //             alert("Error: " + this.responseText);
+
+  //           }
+  //           else{
+  //               //other error type
+  //               alert("Check-token API call error - status: " + this.status);
+
+  //           };
+
+  //           //resolve promise
+  //           resolve();
+          
+  //       }; //end onload function
+
+  //       //form up the token payload
+  //       const tokenString = window.location.search.slice(1);  //queryString minus the "?"
+  //       const tokenPayload = {
+  //           token: tokenString
+  //       };
+
+  //       // Post the request
+  //       xhttp.open("POST", checkTokenUrl);
+  //       xhttp.setRequestHeader("Content-type", "application/json");
+  //       xhttp.send(JSON.stringify(tokenPayload));
+
+  //   }); //end Promise
+    
+  // };
 
 
 
@@ -387,7 +498,7 @@ function gatherResponses(forceSave = false){
 
   const allResponses = {q1: [], q2: [], q3: [] };
 
-  console.log("gatherResponses");
+  console.log("gatherResponses - force save = " + forceSave);
 
   //Q1 loop
   for (let i = 1; i <= $hsa.q1.lastRowNum; i++) {
@@ -447,7 +558,7 @@ function gatherResponses(forceSave = false){
 
 };
 
-//Function to Post data - WEB SERVER SOLUTION              <<<<NOT YET CALLED
+//Function to Post data - WEB SERVER SOLUTION        
 function saveUserData(){
 
   //Post async
@@ -481,18 +592,29 @@ function submitForm(){
   console.log("Form submitting!");
 
   if (confirm("Please confirm if you are happy to submit this survey")) {
-    console.log("You pressed OK!");
-    saveUserData();
+
+    //gather and force save
+    gatherResponses(true); 
+    //navigate to final page
     window.location.assign("final.html");
   } 
   else {
-    console.log("You pressed Cancel!");
     //do nothing
   };
 
 
 };
 
+//function to handle the save button click
+function saveForm(){
+  console.log("Form saving!");
+
+  //gather and force save
+  gatherResponses(true); 
+
+  alert("Form data saved for later. You can safely navigate away.")
+
+};
 
 
 
