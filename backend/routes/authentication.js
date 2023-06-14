@@ -20,7 +20,6 @@ authRouter.post('/', async function(req, res){
 		res.status(400).send("Data Save API validation error: " + error.details[0].message);
 		return;
 	};
-	console.log("Auth payload validated!");
 	
 
 	try {
@@ -132,12 +131,10 @@ authRouter.post('/check-token/', async function(req, res){
 			let tokUserId = decodeStringValue(tokenStr, indexCodes.userId);
 			let tokUserName = decodeStringValue(tokenStr, indexCodes.userName);
 
-			console.log(tokDayOfYear + " " + tokMinsToday  + " " + tokUserId + " " + tokUserName);
+			// console.log(tokDayOfYear + " " + tokMinsToday  + " " + tokUserId + " " + tokUserName);
 
 
       //check authentication
-			// let tokenStr = req.body.token;
-      // let params = tokenStr.split("|");
       let d = new Date();
       let minsToday = d.getMinutes() + (d.getHours() * 60);
       let dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
@@ -163,7 +160,7 @@ authRouter.post('/check-token/', async function(req, res){
         
       }
       else{
-        console.log("Authentication error - timeout! " + dayOfYear + " " + params[0] + " | " +  minsToday + " " +  params[1]);
+        console.log("Authentication error - timeout! " + dayOfYear + " " + tokDayOfYear + " | " +  minsToday + " " +  tokMinsToday);
         //send 401 Unauthorized error
         res.status(401).send("Authentication timeout!");
       };
@@ -211,7 +208,7 @@ function validateCheckTokenPayload(token){
 };
 
 
-// *** CONVENIENCE FUNCTIONS *** //
+// *** TOKEN CODING FUNCTIONS *** //
 
 function encodeStringValue(hostString, indexArray, value){
 

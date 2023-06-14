@@ -36,11 +36,6 @@ dataRouter.get('/:id',  async function(req, res) {     // this route is assumed 
 //POST 
 dataRouter.post('/:id', async function(req, res){
 
-	// if(req.params.id????){
-	// 	res.status(400).send("Data Save API Error: " + error.details[0].message);
-	// 	return;
-	// };
-
 	const { error } = validatePostPayload(req.body);  
 	if(error){
 		res.status(400).send("Data Save API Error: " + error.details[0].message);
