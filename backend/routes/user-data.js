@@ -4,20 +4,9 @@ import express from 'express';  //framework for http endpoints
 import Joi from 'joi';       // validation package using schemas
 import { MongoClient, ServerApiVersion }  from 'mongodb';
 import config from "config";
-import { client } from "./db-connection.js";
+import { client } from "./db-connection.js";  //get the connection client to the HSA DB
 
 const dataRouter = express.Router();
-
-// const dbUri = getDbConnectionStr();
-
-// // Create a MongoClient with a MongoClientOptions object to set the Stable API version
-// const client = new MongoClient(dbUri, {
-//   serverApi: {
-//     version: ServerApiVersion.v1,
-//     strict: true,
-//     deprecationErrors: true,
-//   }
-// });
 
 //GET DATA
 dataRouter.get('/:id',  async function(req, res) {     // this route is assumed "/api/user-data"
@@ -122,23 +111,6 @@ dataRouter.post('/:id', async function(req, res){
 
 
 });
-
-// function getDbConnectionStr(){
-// 	//get conn string
-// 	const baseConnStr = config.get('hsa-db-conn-str');
-
-// 	//get DB username & passweord ENV variables
-// 	const dbUser = process.env.HSA_DB_USER || config.get('hsa_db_user');
-// 	const dbPwd = process.env.HSA_DB_PWD || config.get('hsa_db_pwd');
-
-// 	//form up the string
-// 	let connStr = baseConnStr.replace("<username>", dbUser);
-// 	connStr = connStr.replace("<password>", dbPwd);
-
-// 	//return
-// 	return connStr;
-
-// };
 
 
 function validatePostPayload(userData){
