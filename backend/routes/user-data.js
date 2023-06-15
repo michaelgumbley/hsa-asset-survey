@@ -1,39 +1,71 @@
 import { readFile } from 'node:fs/promises'; 
 import { writeFile } from 'node:fs/promises';
 import express from 'express';  //framework for http endpoints
-const dataRouter = express.Router();
 import Joi from 'joi';       // validation package using schemas
+import { MongoClient, ServerApiVersion }  from 'mongodb';
+import config from "config";
+import { client } from "./db-connection.js";
 
+const dataRouter = express.Router();
 
+// const dbUri = getDbConnectionStr();
 
+// // Create a MongoClient with a MongoClientOptions object to set the Stable API version
+// const client = new MongoClient(dbUri, {
+//   serverApi: {
+//     version: ServerApiVersion.v1,
+//     strict: true,
+//     deprecationErrors: true,
+//   }
+// });
 
+//GET DATA
 dataRouter.get('/:id',  async function(req, res) {     // this route is assumed "/api/user-data"
-	try {
 
-		const pathStr =  getUserDataFilePath(parseInt(req.params.id));
-	  const filePath = new URL(pathStr, import.meta.url);  //needs to be a URL
+	let idParam = req.params.id;
 
-	  const contents = await readFile(filePath, { encoding: 'utf8' });
+	async function run() {
+	  try {
+	    // Connect the client to the server
+	    await client.connect();
 
-	  res.send(contents);
-	} 
-	catch (err) {
+	    //get the collection
+	    const database = client.db('HSA');
+	    const collection = database.collection('user_data');
 
-		if(err.errno == -4058){
-			console.log("Caught - no such file");
-			res.send();  //respond with nothing
-		}
-		else{
+	    // Query for a test
+	    const query = { id: idParam };
+	    const userInfo = await collection.findOne(query);
+
+	    // console.log(userInfo);
+
+	    //check for record found
+	    if(userInfo == null){
+	    	console.log("No existing data");
+				res.send();  //respond with nothing
+	    }
+	    else{
+	    	res.send(userInfo.data);
+	    };
+	   
+	  } 
+	  catch(err) {
+
 			console.error(err.errno + err.message);
 	  	res.status(400).send("Data API Error ");
 		}
-	  
-	}
+	  finally {
+	    // Ensures that the client will close when you finish/error
+	    await client.close();
+	  };
+	};  //end async function
+
+	run().catch(console.dir);
 
 }); 
 
 
-//POST 
+//POST DATA
 dataRouter.post('/:id', async function(req, res){
 
 	const { error } = validatePostPayload(req.body);  
@@ -42,33 +74,71 @@ dataRouter.post('/:id', async function(req, res){
 		return;
 	};
 
-	try {
+	let idParam = req.params.id;
+	let doc = {
+		id: idParam,
+		data: req.body
+	}
 
-		//get filepath
-		const pathStr =  getUserDataFilePath(parseInt(req.params.id));
-	  const filePath = new URL(pathStr, import.meta.url);  //needs to be a URL
+	async function run() {
+	  try {
+	    // Connect the client to the server	
+	    await client.connect();
 
-		//TODO: save backup is a file exists
+	    //get the collection
+	    const database = client.db('HSA');
+	    const collection = database.collection('user_data');
 
-		//write file
-		const result = await writeFile(filePath, JSON.stringify(req.body));
+	    // Query for a test
+	    const query = { id: idParam };
+	    const docCount = await collection.countDocuments(query);
 
-	  res.send(req.body);
-	} 
-	catch (err) {
-	  console.error("My error: ",err.message);
-	  res.status(400).send("Data API Error ");
-	}  
+	    console.log("Doc count:" + docCount);
+
+	    if(docCount == 0){
+	    	//insert
+	    	const result = await collection.insertOne(doc);
+	    }
+	    else{
+	    	//replace
+	    	const result = await collection.replaceOne(query, doc);
+	    };
+
+	    //response
+	    res.send(req.body);
+	  } 
+	  catch(err) {
+
+			console.error(err.errno + err.message);
+	  	res.status(400).send("Data API Error ");
+		}
+	  finally {
+	    // Ensures that the client will close when you finish/error
+	    await client.close();
+	  };
+	};  //end async function
+
+	run().catch(console.dir);
+
 
 });
 
+// function getDbConnectionStr(){
+// 	//get conn string
+// 	const baseConnStr = config.get('hsa-db-conn-str');
 
+// 	//get DB username & passweord ENV variables
+// 	const dbUser = process.env.HSA_DB_USER || config.get('hsa_db_user');
+// 	const dbPwd = process.env.HSA_DB_PWD || config.get('hsa_db_pwd');
 
-function getUserDataFilePath(id){
+// 	//form up the string
+// 	let connStr = baseConnStr.replace("<username>", dbUser);
+// 	connStr = connStr.replace("<password>", dbPwd);
 
-	return '../user-data/data-'+ id +'.json';
+// 	//return
+// 	return connStr;
 
-};
+// };
 
 
 function validatePostPayload(userData){

@@ -97,18 +97,8 @@ document.querySelector("#securityInput").addEventListener("keydown", function (e
 
 });
 
-//form up the parameter token for the main page.
-function createParamsToken(userid, username){
-
-
-    // //format 1: d1,d2,d3,m1,m2,m3,m4,name1-12
-    // //format 2: rl,N7,rl,N3,rl,N6,m1,m2,m3,m4,rn,N5,N9,rl,N2,rl,d1,d2,d3,rl,N4,N1,rl,N8,rl,N10,rl,rl,N11,rl,N12,rl,rn,rn
-    // //get days and minutes
-    // let d = new Date();
-    // let minsToday = d.getMinutes() + (d.getHours() * 60);
-    // let dayOfYear = Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-
-    // return "?" + dayOfYear + "|" + minsToday + "|" + id + "|" + username;
+//Open the Questions page with a token
+function openPageWithToken(userid, username){
 
     //Post user details to generate token
     const pst =  new Promise((resolve) => {
@@ -151,11 +141,6 @@ function createParamsToken(userid, username){
         xhttp.send(JSON.stringify(userPayload));
 
     }); //end Promise
-
-
-
-
-
     
 };
 
@@ -182,17 +167,12 @@ function addSubmitListener(){
             xhttp.onload = function() {
               
                 if(this.status == 200){
+                    //get the response
                     const userObj = JSON.parse(this.responseText);
-                    console.log("Authenticated user - ", userObj);
-
-                    //create authentication token here for security management
-                    console.log(userObj.name);
-                    // let token = createParamsToken(userObj.id, userObj.name) ;
-                    createParamsToken(userObj.id, userObj.name) ;
-                    // console.log(token);
-                    
-                    // //open target page with token
-                    // window.location.assign('questions.html' + '?' + token); 
+            
+                    //Call to create token and open the next page
+                    openPageWithToken(userObj.id, userObj.name) ;
+ 
 
                 }
                 else if(this.status == 401){

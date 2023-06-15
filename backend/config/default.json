@@ -1,4 +1,7 @@
 {
 	"name": "HSA Asset Survey - Production",
-	"default-port": "5000"
+	"default-port": "5000",
+	"hsa-db-conn-str": "mongodb+srv://<username>:<password>@cluster0.aak2gmn.mongodb.net/?retryWrites=true&w=majority",
+	"hsa_db_user": "michaelgumbley",
+	"hsa_db_pwd": "spGEhQOmEwobzpwK"
 }

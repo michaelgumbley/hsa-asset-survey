@@ -28,11 +28,6 @@ app.use('/api/auth', authRouter);   //for any routes that start with "/api/auth"
 
 
 
-//configuration
-console.log("Application name: " + config.get('name'));
-console.log("Default port: " + config.get('default-port'));
-
-
 app.use(morgan('dev')); //tiny, short, dev, common, combined
 console.log("Morgan enabled...");
 startupDebugger("Morgan enabled (debugger)...");
