@@ -1,12 +1,15 @@
 
 //module-level vars
-let credentialsUrl = "http://localhost:5000/api/auth/";
-let tokenGeneratorUrl = "http://localhost:5000/api/auth/get-token/";
+// const urlDomain = "http://localhost:5000"; //dev
+const urlDomain = "https://hsa-survey-70c4965b0531.herokuapp.com"; //prod
+// let credentialsUrl = urlDomain + "/api/auth/";
+let credentialsUrl ="http://localhost:5000/api/auth/";
+let tokenGeneratorUrl = urlDomain + "/api/auth/get-token/";
 let canvasElement;
-var answer = 0;
-var isHuman = false;
+let answer = 0;
+let isHuman = false;
 const maxTries = 2;
-var countTries = 0;
+let countTries = 0;
 
 
 function resetCanvas(){
@@ -19,7 +22,7 @@ function resetCanvas(){
     let challengeStr = num1 + " + " + num2;
     // console.log(challengeStr, answer);
 
-    var ctx = canvasElement.getContext("2d");
+    let ctx = canvasElement.getContext("2d");
     ctx.scale(1, 1);
     ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
     ctx.font = "18px Arial italics";

@@ -11,7 +11,8 @@ import config from "config";  // environment configuration package
 //check for PORT ENV variable
 const port = process.env.PORT || config.get('default-port');
 
-const startupDebugger = debug("app:startup");
+const appDebugger = debug("app:common");
+appDebugger("debugger online...");
 
 
 					//CODE TO ALLOW CROSS ORIGIN REQUESTS - using port 5000 (env var PORT)
@@ -29,11 +30,10 @@ app.use('/api/auth', authRouter);   //for any routes that start with "/api/auth"
 
 
 app.use(morgan('dev')); //tiny, short, dev, common, combined
-console.log("Morgan enabled...");
-startupDebugger("Morgan enabled (debugger)...");
+appDebugger("Morgan enabled");
 
 
 
 
-
+//listen
 app.listen(port, () => console.log('Listening on port', port));

@@ -2,74 +2,85 @@ import { readFile } from 'node:fs/promises';
 import express from 'express';  //framework for http endpoints
 const authRouter = express.Router();
 import Joi from 'joi';       // validation package using schemas
+import { client } from "./db-connection.js";  //get the connection client to the HSA DB
+import debug from 'debug';
 
-const resourcePathStr = "../user-data/credentials.json";
+const appDebugger = debug("app:common");
+const dataDebugger = debug("app:data");
+const dbName = "HSA";
+const collName = "credentials";
 const fillerChar = "$";
-let indexCodes = {};
+const indexCodes = {};
 indexCodes.dayOfYear = [39,6,15];
 indexCodes.minsToday = [35,40,5,23];
 indexCodes.userId = [7,18];
 indexCodes.userName = [29,8,21,37,4,28,32,9,22,26,16,38,19,2];
 
-
 //POST - main authentication request
 authRouter.post('/', async function(req, res){
 
+	appDebugger("authRouter.post: main");
+
 	const { error } = validateAuthPayload(req.body);  
 	if(error){
-		res.status(400).send("Data Save API validation error: " + error.details[0].message);
+		res.status(400).send("Data Save API request payload error: " + error.details[0].message);
 		return;
 	};
-	
 
-	try {
+	appDebugger("auth-main payload validated!");
 
-		//get filepath
-	  const fileUrl = new URL(resourcePathStr, import.meta.url);  //needs to be a URL
+	async function run() {
+	  try {
+	    // Connect the client to the server
+	    await client.connect();
 
-	  //read in credentials
-	  const credentialsText = await readFile(fileUrl, { encoding: 'utf8' });
-		const credentialsArray = JSON.parse(credentialsText);
+	    //get the collection
+	    const database = client.db(dbName);
+	    const collection = database.collection(collName);
 
-	  //get payload elements
-	  let userEmail = req.body.email;
-    let userPwd = req.body.password;
-
-	  //check for a credential match
-    let index = credentialsArray.findIndex(function(val, idx, arr){
-
-      return val.email === userEmail && val.password === userPwd;
-    });
-
-
-		//do the id & password match?
-    if (index !== -1) {
-        
-      console.log("User found!");
-
-	    //create the return object
-	    const userObj = {
-	    	id: credentialsArray[index].id,
-	    	name: credentialsArray[index].name
-	    };
-
-	    //return valid user details
-	    res.send(userObj);
 	    
-    }
-    else {
-    		//Authentication issue
-        console.log("Username or password error!");
-    		//return error code
-    		res.status(401).send("Authentication issue - user not found");
+	    //get payload elements
+		  let userEmail = req.body.email;
+	    let userPwd = req.body.password;
 
-    };
-	  
-	} 
-	catch (err) {
-	  console.error("authRouter error: ",err.message);
-	  res.status(400).send("Data API Error ");
-	}  
+	    // Find in collection
+	    const query = { email: userEmail, password: userPwd };
+	    const userInfo = await collection.findOne(query);
+
+	    dataDebugger(userInfo);
+
+	    //check for record found
+	    if(userInfo == null){
+
+	    	appDebugger("User not found");
+
+				//return error code
+    		res.status(401).send("Authentication issue - user not found");
+	    }
+	    else{
+
+				//create the return object
+				const userObj = {
+					id: userInfo.id,
+					name: userInfo.name
+				};
+
+		    //return valid user details
+		    res.send(userObj);
+	    };
+	  } 
+	  catch(err) {
+
+			appDebugger(err.errno + err.message);
+	  	res.status(400).send("authRouter API Error ");
+		}
+	  finally {
+	    // Ensures that the client will close when you finish/error
+	    await client.close();
+	  };
+	};  //end async function
+
+	run().catch(console.dir);
 
 });
 
@@ -77,13 +88,15 @@ authRouter.post('/', async function(req, res){
 //POST - get-token request
 authRouter.post('/get-token/', async function(req, res){
 
+	appDebugger("authRouter.post: get-token");
+
 	const { error } = validateGetTokenPayload(req.body);  
 	if(error){
 		res.status(400).send("Get token API validation error: " + error.details[0].message);
 		return;
 	};
 	
-	console.log("get-token payload validated!");
+	appDebugger("get-token payload validated!");
 
   //get days and minutes
   let d = new Date();
@@ -109,13 +122,15 @@ authRouter.post('/get-token/', async function(req, res){
 //POST - check-token request
 authRouter.post('/check-token/', async function(req, res){
 
+	appDebugger("authRouter.post: check-token");
+
 	const { error } = validateCheckTokenPayload(req.body);  
 	if(error){
 		res.status(400).send("check-token API validation error: " + error.details[0].message);
 		return;
 	};
 	
-	console.log("check-token payload validated!");
+	appDebugger("check-token payload validated!");
 
 	//create return object
 	let userObj = {
@@ -131,7 +146,7 @@ authRouter.post('/check-token/', async function(req, res){
 			let tokUserId = decodeStringValue(tokenStr, indexCodes.userId);
 			let tokUserName = decodeStringValue(tokenStr, indexCodes.userName);
 
-			// console.log(tokDayOfYear + " " + tokMinsToday  + " " + tokUserId + " " + tokUserName);
+			// appDebugger(tokDayOfYear + " " + tokMinsToday  + " " + tokUserId + " " + tokUserName);
 
 
       //check authentication
@@ -160,7 +175,7 @@ authRouter.post('/check-token/', async function(req, res){
         
       }
       else{
-        console.log("Authentication error - timeout! " + dayOfYear + " " + tokDayOfYear + " | " +  minsToday + " " +  tokMinsToday);
+        appDebugger("Authentication error - timeout! " + dayOfYear + " " + tokDayOfYear + " | " +  minsToday + " " +  tokMinsToday);
         //send 401 Unauthorized error
         res.status(401).send("Authentication timeout!");
       };
@@ -217,7 +232,7 @@ function encodeStringValue(hostString, indexArray, value){
 	let indexVal = -1;
 	let stringVal = value.toString();
 
-	console.log("Encoding ", indexArray.length);
+	appDebugger("Encoding ", indexArray.length);
 
 	//loop through array
 	for (let i = 0; i < indexArray.length; i++){  //standard loop for arrays!

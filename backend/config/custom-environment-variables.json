@@ -1,6 +1,5 @@
 {
 	"mail": {
 		"password": "APPDEMO_PWD"
-	},
-	"hsa_db_pwd": "HSA_DB_PWD"
+	}
 }

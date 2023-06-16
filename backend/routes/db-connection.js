@@ -17,10 +17,8 @@ function getDbConnectionStr(){
 	const baseConnStr = config.get('hsa-db-conn-str');
 
 	//get DB username & passweord ENV variables
-	const dbUser = process.env.HSA_DB_USER || config.get('hsa_db_user');
-	const dbPwd = process.env.HSA_DB_PWD || config.get('hsa_db_pwd');
-
-	console.log("PWD:" + dbPwd);
+	const dbUser = process.env.HSA_DB_USER || "missing_env_HSA_DB_USER";
+	const dbPwd = process.env.HSA_DB_PWD || "missing_env_HSA_DB_PWD";
 
 	//form up the string
 	let connStr = baseConnStr.replace("<username>", dbUser);

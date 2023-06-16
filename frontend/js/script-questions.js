@@ -1,6 +1,8 @@
 //Module-level Variables
-const savedDataUrlStub = "http://localhost:5000/api/user-data/"; 
-const checkTokenUrl = "http://localhost:5000/api/auth/check-token";
+// const urlDomain = "http://localhost:5000"; //dev
+const urlDomain = "https://hsa-survey-70c4965b0531.herokuapp.com"; //prod
+const savedDataUrlStub = urlDomain + "/api/user-data/"; 
+const checkTokenUrl = urlDomain + "/api/auth/check-token";
 $hsa = {};
 $hsa.authenticated = false;
 $hsa.q1 = {};

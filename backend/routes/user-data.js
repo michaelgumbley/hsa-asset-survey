@@ -3,15 +3,19 @@ import { writeFile } from 'node:fs/promises';
 import express from 'express';  //framework for http endpoints
 import Joi from 'joi';       // validation package using schemas
 import { MongoClient, ServerApiVersion }  from 'mongodb';
-import config from "config";
 import { client } from "./db-connection.js";  //get the connection client to the HSA DB
+import debug from 'debug';
 
+const appDebugger = debug("app:common");
 const dataRouter = express.Router();
+const dbName = "HSA";
+const collName = "user_data";
 
 //GET DATA
 dataRouter.get('/:id',  async function(req, res) {     // this route is assumed "/api/user-data"
 
 	let idParam = req.params.id;
+	appDebugger("dataRouter.get");
 
 	async function run() {
 	  try {
@@ -19,18 +23,18 @@ dataRouter.get('/:id',  async function(req, res) {     // this route is assumed 
 	    await client.connect();
 
 	    //get the collection
-	    const database = client.db('HSA');
-	    const collection = database.collection('user_data');
+	    const database = client.db(dbName);
+	    const collection = database.collection(collName);
 
 	    // Query for a test
 	    const query = { id: idParam };
 	    const userInfo = await collection.findOne(query);
 
-	    // console.log(userInfo);
+	    appDebugger(userInfo);
 
 	    //check for record found
 	    if(userInfo == null){
-	    	console.log("No existing data");
+	    	appDebugger("No existing data");
 				res.send();  //respond with nothing
 	    }
 	    else{
@@ -40,8 +44,8 @@ dataRouter.get('/:id',  async function(req, res) {     // this route is assumed 
 	  } 
 	  catch(err) {
 
-			console.error(err.errno + err.message);
-	  	res.status(400).send("Data API Error ");
+			appDebugger(err.errno + err.message);
+	  	res.status(400).send("Get Data API Error ");
 		}
 	  finally {
 	    // Ensures that the client will close when you finish/error
@@ -57,6 +61,7 @@ dataRouter.get('/:id',  async function(req, res) {     // this route is assumed 
 //POST DATA
 dataRouter.post('/:id', async function(req, res){
 
+	appDebugger("dataRouter.post");
 	const { error } = validatePostPayload(req.body);  
 	if(error){
 		res.status(400).send("Data Save API Error: " + error.details[0].message);
@@ -82,7 +87,7 @@ dataRouter.post('/:id', async function(req, res){
 	    const query = { id: idParam };
 	    const docCount = await collection.countDocuments(query);
 
-	    console.log("Doc count:" + docCount);
+	    appDebugger("Doc count:" + docCount);
 
 	    if(docCount == 0){
 	    	//insert
@@ -98,8 +103,8 @@ dataRouter.post('/:id', async function(req, res){
 	  } 
 	  catch(err) {
 
-			console.error(err.errno + err.message);
-	  	res.status(400).send("Data API Error ");
+			appDebugger(err.errno + err.message);
+	  	res.status(400).send("Data Save API Error ");
 		}
 	  finally {
 	    // Ensures that the client will close when you finish/error
